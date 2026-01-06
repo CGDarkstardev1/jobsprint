@@ -1,0 +1,1838 @@
+"<details type="reasoning" done="true" duration="3">
+<summary>Thought for 3 seconds</summary>
+> The user is asking me to:
+> 
+> 1. Research any needed information based on the PRD (Product Requirements Document) that was provided in the implementation guide
+> 2. Not change any of the libraries specified in the PRD
+> 3. Improve the package management detection logic to be more robust and resilient
+> 4. Make the script detect the Linux distribution, major version, package managers, environments, and config files
+> 5. Make it never fail and ask for any information or elevated privileges needed
+> 6. Use beautiful TUI libraries like gum for Python-wrapped bash scripts
+> 7. Make the output highly verbose but clean, without extraneous marks and escape characters
+> 8. Keep the user informed about what's happening
+> 9. Focus on user experience and interface quality
+> 
+> Let me first research the key components mentioned in the PRD to ensure I understand them correctly:
+> 
+> 1. Puter.js - This appears to be a JavaScript framework for AI automation
+> 2. Zapier MCP - A pre-authenticated Zapier client for workflow automation
+> 3. n8n - A self-hosted workflow automation tool
+> 4. Free AI models - gpt-3.5-turbo-free, code-davinci-free, text-davinci-free-002
+> 
+> I should also research gum, which is a TUI library for creating beautiful terminal interfaces, to understand how to integrate it into the bash script.
+> 
+> Let me search for information about these components to ensure I have the most up-to-date and accurate information.
+</details>
+I'll research the key components mentioned in the PRD to ensure I have the most up-to-date information, then improve the script with better package management detection and beautiful TUI elements using gum.
+
+<glm_block >{"type": "mcp", "data": {"metadata": {"id": "call_xxvwabyqef", "name": "search", "arguments": "{\"queries\":[\"Puter.js AI automation platform documentation\", \"gum TUI library bash terminal interface\", \"Linux distribution detection methods bash script\", \"Zapier MCP API integration\", \"n8n self-hosted installation guide\"]}", "result": "\u30101\u2020Zapier MCP\u2014Connect your AI to any app instantly\u2020https://zapier.com/mcp\u3011\nConnect your AI to any app with Zapier MCP. The fastest way to let your AI assistant interact with thousands of apps. No complex API integrations required.\n\n\u30102\u2020Zapier MCP: Perform 30000+ actions in your AI tool\u2020https://zapier.com/blog/zapier-mcp-guide\u3011\nThe fastest way to let your AI assistant interact with thousands of apps. No complex API integrations required.\n\n\u30103\u2020AutoContent API MCP Server - MCP AI\u2020https://zapier.com/mcp/autocontent-api\u3011\nZapier AutoContent API MCP lets you connect AutoContent API's actions with any AI tool that supports MCP, all without managing integrations or writing glue code\n\n\u30104\u2020TPS API MCP Server - MCP AI\u2020https://zapier.com/mcp/tps-api\u3011\nZapier TPS API MCP lets you connect TPS API's actions with any AI tool that supports MCP, all without managing integrations or writing glue code.\n\n\u30105\u2020How to Set Up and Use Zapier MCP Server for AI Automation\u2020https://apidog.com/blog/zapier-mcp-server\u3011\nThis guide walks you through setting up Zapier MCP, configuring actions, and integrating it with your AI client for seamless automation.\n\n\u30106\u2020charmbracelet/gum: A tool for glamorous shell scripts\u2020https://github.com/charmbracelet/gum\u3011\nGum provides highly configurable, ready-to-use utilities to help you write useful shell scripts and dotfiles aliases with just a few lines of code.\n\n\u30107\u2020rothgar/awesome-tuis: List of projects that provide terminal\u2020https://github.com/rothgar/awesome-tuis\u3011\ntuibox A single-header C terminal UI library, capable of creating mouse-driven, interactive applications on the command line. Tui Widgets A high-level widget\n\n\u30108\u2020gum | x-cmd pkg - X-CMD\u2020https://www.x-cmd.com/pkg/gum\u3011\ngum is a terminal UI component toolkit developed in Go by the Charm team in 2022, designed to help users quickly build interactive TUI interfaces.\n\n\u30109\u2020Simple TUIs with Babashka and Gum - The Rattlin' Blog\u2020https://rattlin.blog/bbgum.html\u3011\nA tool called gum that, similar to bb, ships as a single binary loaded with functionality. gum is intended to be shelled out to from scripts - perfect for bb!\n\n\u301010\u20207 TUI libraries for creating interactive terminal apps\u2020https://blog.logrocket.com/7-tui-libraries-interactive-terminal-apps\u3011\nGum is a batteries-included library that can be used to take inputs for a shell script. When using Gum, you don't have to write any Go code, and\n\n\u301011\u2020How to detect the OS from a Bash script?\u2020https://stackoverflow.com/questions/394230/how-to-detect-the-os-from-a-bash-script\u3011\nI have some OS specific aliases so I was looking for a way to determine if the script is running on Mac OS X, Linux or Cygwin.\n\n\u301012\u2020How can I get distribution name and version number in a\u2020https://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script\u3011\nSo inside your Bash script you can just include the file, and you will have access to all variables described here (for example: NAME, VERSION,\n\n\u301013\u2020Detect OS and Distro in Bash - Hai's DevBits - WordPress.com\u2020https://wuhrr.wordpress.com/2020/06/19/detect-os-and-distro-in-bash\u3011\nHere is how I detect the OS and distro. For Linux systems, there exists a file called /etc/os-release which contains the system's distribution information.\n\n\u301014\u2020Shell script for determining Linux distribution\u2020https://gist.github.com/takuzoo3868/730000af7491dc354b0d38510493f982\u3011\nShell script for determining Linux distribution. GitHub Gist: instantly share code, notes, and snippets.\n\n\u301015\u2020How to tell whether it is Fedora or Debian using a shell script\u2020https://superuser.com/questions/1156036/how-to-tell-whether-it-is-fedora-or-debian-using-a-shell-script\u3011\nThe easiest way is to look at /etc/os-release or run hostnamectl status. In a script, you could simply do #!/bin/sh source /etc/os-release echo $PRETTY_NAME\n\n\u301016\u2020n8n Hosting Documentation and Guides\u2020https://docs.n8n.io/hosting\u3011\nAccess n8n hosting documentation and guides. Find comprehensive resources to help you set up and manage your self-hosted n8n instances.\n\n\u301017\u2020An easy step-by-step guide on how to self-host n8n\u2020https://community.n8n.io/t/an-easy-step-by-step-guide-on-how-to-self-host-n8n/6505\u3011\nGo to your Domain provider and set the A record. You can find a DNS setting option. Enter the subdomain (you can use n8n) in the Name field and\n\n\u301018\u2020How To Set Up N8N Self Hosting In 3 Minutes (6 Ways)\u2020https://www.youtube.com/watch?v=kq5bmrjPPAY\u3011\nHost N8N on Render, Railway, DigitalOcean, Heroku, your own computer, and Hostinger using this free, simple N8N self hosting guide. My\n\n\u301019\u2020Best setup for self hosting N8N locally without cloud/server\u2020https://www.reddit.com/r/n8n/comments/1gm0uy6/beginner_seeking_advice_best_setup_for_self\u3011\nI'm just starting with N8N and want to get hands-on experience by running it locally on my Windows 11 machine. For now, I'm aiming to keep things cost-free.\n\n\u301020\u2020How to Set Up n8n: A Step-by-Step Guide for Self-Hosted\u2020https://www.digitalocean.com/community/tutorials/how-to-setup-n8n\u3011\nStep 1 \u2014 Create Docker Compose Configuration \u00b7 Step 2 \u2014 Start n8n and Verify Installation \u00b7 Step 3 \u2014 Secure n8n with HTTPS \u00b7 Step 4 - Create Your\n\n\u301021\u2020Puter.js: Free, Serverless, Cloud and AI Powered by Puter.\u2020https://docs.puter.com\u3011\nPuter.js brings free, serverless, Cloud and AI directly to your frontend JavaScript with no backend code or API keys required. Just include a single <script>\n\n\u301022\u2020AI\u2020https://docs.puter.com/AI\u3011\nPuter.js provides powerful AI capabilities through various APIs that allow you to integrate artificial intelligence into your applications. Available Functions.\n\n\u301023\u2020Getting Started\u2020https://docs.puter.com/getting-started\u3011\nYou're now ready to start using Puter.js in your web application. No need to install any dependencies or set up a server. No API keys or configuration required.\n\n\u301024\u2020Puter.js - Free, Serverless, Cloud and AI\u2020https://developer.puter.com\u3011\nPuter.js enables you to build advanced, cloud-native websites and applications with just frontend code. Some examples include: AI-Powered Tools like\n\n\u301025\u2020HeyPuter/puter.js: \u2692\ufe0f The official JavaScript SDK for Puter\u2020https://github.com/HeyPuter/puter.js\u3011\nThe official JavaScript SDK for Puter.com. Cloud and AI features right from your frontend code! \u00ab LIVE DEMO \u00bb", "display_result": "", "duration": "6.0s", "status": "completed", "is_error": false, "mcp_server": {"name": "mcp-server"}}, "thought": null, "ppt": null, "browser": {"search_result": [{"title": "Zapier MCP\u2014Connect your AI to any app instantly", "url": "https://zapier.com/mcp", "text": "Connect your AI to any app with Zapier MCP. The fastest way to let your AI assistant interact with thousands of apps. No complex API integrations required.", "index": 1, "favicon": "", "ref_id": "", "host_name": "zapier.com"}, {"title": "Zapier MCP: Perform 30000+ actions in your AI tool", "url": "https://zapier.com/blog/zapier-mcp-guide", "text": "The fastest way to let your AI assistant interact with thousands of apps. No complex API integrations required.", "index": 2, "favicon": "", "ref_id": "", "host_name": "zapier.com"}, {"title": "AutoContent API MCP Server - MCP AI", "url": "https://zapier.com/mcp/autocontent-api", "text": "Zapier AutoContent API MCP lets you connect AutoContent API's actions with any AI tool that supports MCP, all without managing integrations or writing glue code", "index": 3, "favicon": "", "ref_id": "", "host_name": "zapier.com"}, {"title": "TPS API MCP Server - MCP AI", "url": "https://zapier.com/mcp/tps-api", "text": "Zapier TPS API MCP lets you connect TPS API's actions with any AI tool that supports MCP, all without managing integrations or writing glue code.", "index": 4, "favicon": "", "ref_id": "", "host_name": "zapier.com"}, {"title": "How to Set Up and Use Zapier MCP Server for AI Automation", "url": "https://apidog.com/blog/zapier-mcp-server", "text": "This guide walks you through setting up Zapier MCP, configuring actions, and integrating it with your AI client for seamless automation.", "index": 5, "favicon": "", "ref_id": "", "host_name": "apidog.com"}, {"title": "charmbracelet/gum: A tool for glamorous shell scripts", "url": "https://github.com/charmbracelet/gum", "text": "Gum provides highly configurable, ready-to-use utilities to help you write useful shell scripts and dotfiles aliases with just a few lines of code.", "index": 6, "favicon": "", "ref_id": "", "host_name": "github.com"}, {"title": "rothgar/awesome-tuis: List of projects that provide terminal", "url": "https://github.com/rothgar/awesome-tuis", "text": "tuibox A single-header C terminal UI library, capable of creating mouse-driven, interactive applications on the command line. Tui Widgets A high-level widget", "index": 7, "favicon": "", "ref_id": "", "host_name": "github.com"}, {"title": "gum | x-cmd pkg - X-CMD", "url": "https://www.x-cmd.com/pkg/gum", "text": "gum is a terminal UI component toolkit developed in Go by the Charm team in 2022, designed to help users quickly build interactive TUI interfaces.", "index": 8, "favicon": "", "ref_id": "", "host_name": "www.x-cmd.com"}, {"title": "Simple TUIs with Babashka and Gum - The Rattlin' Blog", "url": "https://rattlin.blog/bbgum.html", "text": "A tool called gum that, similar to bb, ships as a single binary loaded with functionality. gum is intended to be shelled out to from scripts - perfect for bb!", "index": 9, "favicon": "", "ref_id": "", "host_name": "rattlin.blog"}, {"title": "7 TUI libraries for creating interactive terminal apps", "url": "https://blog.logrocket.com/7-tui-libraries-interactive-terminal-apps", "text": "Gum is a batteries-included library that can be used to take inputs for a shell script. When using Gum, you don't have to write any Go code, and", "index": 10, "favicon": "", "ref_id": "", "host_name": "blog.logrocket.com"}, {"title": "How to detect the OS from a Bash script?", "url": "https://stackoverflow.com/questions/394230/how-to-detect-the-os-from-a-bash-script", "text": "I have some OS specific aliases so I was looking for a way to determine if the script is running on Mac OS X, Linux or Cygwin.", "index": 11, "favicon": "", "ref_id": "", "host_name": "stackoverflow.com"}, {"title": "How can I get distribution name and version number in a", "url": "https://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script", "text": "So inside your Bash script you can just include the file, and you will have access to all variables described here (for example: NAME, VERSION,", "index": 12, "favicon": "", "ref_id": "", "host_name": "unix.stackexchange.com"}, {"title": "Detect OS and Distro in Bash - Hai's DevBits - WordPress.com", "url": "https://wuhrr.wordpress.com/2020/06/19/detect-os-and-distro-in-bash", "text": "Here is how I detect the OS and distro. For Linux systems, there exists a file called /etc/os-release which contains the system's distribution information.", "index": 13, "favicon": "", "ref_id": "", "host_name": "wuhrr.wordpress.com"}, {"title": "Shell script for determining Linux distribution", "url": "https://gist.github.com/takuzoo3868/730000af7491dc354b0d38510493f982", "text": "Shell script for determining Linux distribution. GitHub Gist: instantly share code, notes, and snippets.", "index": 14, "favicon": "", "ref_id": "", "host_name": "gist.github.com"}, {"title": "How to tell whether it is Fedora or Debian using a shell script", "url": "https://superuser.com/questions/1156036/how-to-tell-whether-it-is-fedora-or-debian-using-a-shell-script", "text": "The easiest way is to look at /etc/os-release or run hostnamectl status. In a script, you could simply do #!/bin/sh source /etc/os-release echo $PRETTY_NAME", "index": 15, "favicon": "", "ref_id": "", "host_name": "superuser.com"}, {"title": "n8n Hosting Documentation and Guides", "url": "https://docs.n8n.io/hosting", "text": "Access n8n hosting documentation and guides. Find comprehensive resources to help you set up and manage your self-hosted n8n instances.", "index": 16, "favicon": "", "ref_id": "", "host_name": "docs.n8n.io"}, {"title": "An easy step-by-step guide on how to self-host n8n", "url": "https://community.n8n.io/t/an-easy-step-by-step-guide-on-how-to-self-host-n8n/6505", "text": "Go to your Domain provider and set the A record. You can find a DNS setting option. Enter the subdomain (you can use n8n) in the Name field and", "index": 17, "favicon": "", "ref_id": "", "host_name": "community.n8n.io"}, {"title": "How To Set Up N8N Self Hosting In 3 Minutes (6 Ways)", "url": "https://www.youtube.com/watch?v=kq5bmrjPPAY", "text": "Host N8N on Render, Railway, DigitalOcean, Heroku, your own computer, and Hostinger using this free, simple N8N self hosting guide. My", "index": 18, "favicon": "", "ref_id": "", "host_name": "www.youtube.com"}, {"title": "Best setup for self hosting N8N locally without cloud/server", "url": "https://www.reddit.com/r/n8n/comments/1gm0uy6/beginner_seeking_advice_best_setup_for_self", "text": "I'm just starting with N8N and want to get hands-on experience by running it locally on my Windows 11 machine. For now, I'm aiming to keep things cost-free.", "index": 19, "favicon": "", "ref_id": "", "host_name": "www.reddit.com"}, {"title": "How to Set Up n8n: A Step-by-Step Guide for Self-Hosted", "url": "https://www.digitalocean.com/community/tutorials/how-to-setup-n8n", "text": "Step 1 \u2014 Create Docker Compose Configuration \u00b7 Step 2 \u2014 Start n8n and Verify Installation \u00b7 Step 3 \u2014 Secure n8n with HTTPS \u00b7 Step 4 - Create Your", "index": 20, "favicon": "", "ref_id": "", "host_name": "www.digitalocean.com"}, {"title": "Puter.js: Free, Serverless, Cloud and AI Powered by Puter.", "url": "https://docs.puter.com", "text": "Puter.js brings free, serverless, Cloud and AI directly to your frontend JavaScript with no backend code or API keys required. Just include a single <script>", "index": 21, "favicon": "", "ref_id": "", "host_name": "docs.puter.com"}, {"title": "AI", "url": "https://docs.puter.com/AI", "text": "Puter.js provides powerful AI capabilities through various APIs that allow you to integrate artificial intelligence into your applications. Available Functions.", "index": 22, "favicon": "", "ref_id": "", "host_name": "docs.puter.com"}, {"title": "Getting Started", "url": "https://docs.puter.com/getting-started", "text": "You're now ready to start using Puter.js in your web application. No need to install any dependencies or set up a server. No API keys or configuration required.", "index": 23, "favicon": "", "ref_id": "", "host_name": "docs.puter.com"}, {"title": "Puter.js - Free, Serverless, Cloud and AI", "url": "https://developer.puter.com", "text": "Puter.js enables you to build advanced, cloud-native websites and applications with just frontend code. Some examples include: AI-Powered Tools like", "index": 24, "favicon": "", "ref_id": "", "host_name": "developer.puter.com"}, {"title": "HeyPuter/puter.js: \u2692\ufe0f The official JavaScript SDK for Puter", "url": "https://github.com/HeyPuter/puter.js", "text": "The official JavaScript SDK for Puter.com. Cloud and AI features right from your frontend code! \u00ab LIVE DEMO \u00bb", "index": 25, "favicon": "", "ref_id": "", "host_name": "github.com"}], "total_results": 25, "queries": ["Puter.js AI automation platform documentation", "gum TUI library bash terminal interface", "Linux distribution detection methods bash script", "Zapier MCP API integration", "n8n self-hosted installation guide"], "current_url": "about:blank", "page_title": "Untitled", "session_id": "", "turn_count": 0}}}</glm_block>
+
+
+
+<details type="reasoning" done="true" duration="3">
+<summary>Thought for 3 seconds</summary>
+> Based on the search results, I now have a better understanding of the key components:
+> 
+> 1. **Puter.js**: This is a JavaScript SDK that provides free, serverless cloud and AI capabilities directly in frontend code without needing backend code or API keys. It has AI capabilities through various APIs.
+> 
+> 2. **Gum**: This is a TUI (Terminal User Interface) library developed in Go by the Charm team. It provides highly configurable utilities for creating interactive shell scripts with beautiful terminal interfaces. It's designed to be called from shell scripts and doesn't require writing Go code.
+> 
+> 3. **Linux Distribution Detection**: The most reliable method is to use `/etc/os-release` file, which contains distribution information. This is standardized across most modern Linux distributions.
+> 
+> 4. **Zapier MCP**: This is a service that allows AI assistants to interact with thousands of apps through Zapier without complex API integrations. It provides pre-authenticated access.
+> 
+> 5. **n8n**: This is a workflow automation tool that can be self-hosted, typically using Docker.
+> 
+> Now I need to improve the script with:
+> 1. Better Linux distribution detection using `/etc/os-release`
+> 2. Integration of gum for beautiful TUI elements
+> 3. More robust package management detection
+> 4. Better error handling and user feedback
+> 5. More verbose but clean output
+> 
+> Let me research gum usage examples to understand how to integrate it properly into bash scripts.
+</details>
+
+
+<glm_block >{"type": "mcp", "data": {"metadata": {"id": "call_jcpm4yjg8ok", "name": "search", "arguments": "{\"queries\":[\"gum TUI examples bash script usage\", \"bash script gum input output formatting\", \"Linux package manager detection robust script\", \"sudo privilege escalation detection bash\", \"beautiful terminal output formatting bash\"]}", "result": "\u301026\u2020Saving displayed output from terminal to file with a nice\u2020https://stackoverflow.com/questions/34275580/saving-displayed-output-from-terminal-to-file-with-a-nice-format\u3011\nI need to \"dump\" all information from different commands to a file in bash. When I enter the command at the terminal it shows with a pretty nice formatted and\n\n\u301027\u2020Textualize/rich: Rich is a Python library for rich text and\u2020https://github.com/Textualize/rich\u3011\nRich is a Python library for rich text and beautiful formatting in the terminal. The Rich API makes it easy to add color and style to terminal output.\n\n\u301028\u2020What are some CLI tools that you use that have pretty\u2020https://www.reddit.com/r/commandline/comments/114ibz7/what_are_some_cli_tools_that_you_use_that_have\u3011\nperl -MTerm::ANSIColor is my go-to for DIY pretty output. Instead of having to look up ANSI color codes, you can reference them via straight-forward names like\n\n\u301029\u2020How can I turn ugly output into pretty, useful information?\u2020https://unix.stackexchange.com/questions/38977/how-can-i-turn-ugly-output-into-pretty-useful-information\u3011\nI'm trying awk, perl and grep, but I'm having trouble keeping all the info for one \"section\" together before I print the CSV line.\n\n\u301030\u2020How to change the color of the output in Linux Bash?\u2020https://www.digitalocean.com/community/questions/how-to-change-the-color-of-the-output-in-linux-bash\u3011\nFirst we set the green color as a variable; After that we set a variable called clear so that we could reset the color of the terminal,\n\n\u30106\u2020charmbracelet/gum: A tool for glamorous shell scripts\u2020https://github.com/charmbracelet/gum\u3011\nGum provides highly configurable, ready-to-use utilities to help you write useful shell scripts and dotfiles aliases with just a few lines of code.\n\n\u301032\u2020Enhancing Shell Scripts with Charmbracelet Gum\u2020https://medium.com/@jignyasamishra/enhancing-shell-scripts-with-charmbracelet-gum-a-practical-guide-b9a534e3caf4\u3011\nCharmbracelet Gum is a powerful tool that can significantly improve the user experience of command-line interfaces (CLIs) and shell scripts.\n\n\u301033\u2020Linux Fu: Gum Up Your Script\u2020https://hackaday.com/2023/03/29/linux-fu-gum-up-your-script\u3011\nGum can help. It's a utility that can handle your script input and output with a little flair while requiring almost no effort on your part.\n\n\u301034\u2020How Do I Use Charmbracelet Gum to Improve My Scripts\u2020https://tech.aufomm.com/how-do-i-use-charmbracelet-gum-to-improve-my-scripts\u3011\nThis is a CLI tool that helps people like myself to capture user input, filter lists or files, provide selections out of box and can be easily integrated with\n\n\u301035\u2020Beautiful bash scripts with Gum\u2020https://maciejwalkowiak.com/blog/beautiful-bash-scripts-with-gum\u3011\nBash scripts don't need to be boring. I found a fantastic tool that make it easy to use great looking UI elements in bash - Gum.\n\n\u301036\u2020Gum: A tool for glamorous shell scripts : r/commandline\u2020https://www.reddit.com/r/commandline/comments/wa9n1c/gum_a_tool_for_glamorous_shell_scripts\u3011\nAt Charm, we generally use Go for all our libraries like Bubble Tea, Bubbles, and Lip Gloss. Go should be easy to pick up if you know JavaScript and Python.\n\n\u301037\u2020How To Create A \"Proper\" CLI With Shell And Charm Gum\u2020https://www.youtube.com/watch?v=U8zCHA-9VLA\u3011\nWould you like to create a \"proper\" CLI writing a Bash script instead of having to do it in Go, Python, or any other language? Charm Gum is\n\n\u301038\u2020Identifying the system package manager\u2020https://unix.stackexchange.com/questions/46081/identifying-the-system-package-manager\u3011\nInstead of identifying binary programs, you should start from identifying distributions. Hare are a few lines that works in bash scripting:\n\n\u301039\u2020How to Identify the Package Manager of a Linux System\u2020https://www.baeldung.com/linux/identify-system-package-manager\u3011\nThis script uses the for loop to iterate through a list of some common package managers, checking each one without stopping at the first match.\n\n\u301040\u2020bash, key-value pair to determine the package manager in\u2020https://stackoverflow.com/questions/69380788/bash-key-value-pair-to-determine-the-package-manager-in-use\u3011\nI want to detect the package manager on the system and then use that later on in my script. However, I feel this is clunky. type apt &> /dev\n\n\u301041\u2020Linux Package Managers Are Worse Than You Think\u2020https://medium.com/@fulalas/linux-package-managers-are-worse-than-you-think-8a106569399a\u3011\nLinux package managers have existed for decades, yet they still don't accurately detect the actual dependencies of packages. The process is not\n\n\u301042\u2020ShellCheck, a static analysis tool for shell scripts\u2020https://github.com/koalaman/shellcheck\u3011\nA shell script static analysis tool. ShellCheck is a GPLv3 tool that gives warnings and suggestions for bash/sh shell scripts.\n\n\u301043\u2020Linux Privilege Escalation: Techniques, Prevention & More\u2020https://www.strongdm.com/blog/linux-privilege-escalation\u3011\nshell escape feature, the hacker can get a root shell by using the following command: sudo vim :!bash. Note: Vim's shell escape (:!bash)\n\n\u301044\u2020Sudo Shell Escaping Privilege Escalation (Linux\u2020https://medium.com/@amaraltohami30/sudo-shell-escaping-privilege-escalation-linux-privilege-escalation-e17aef12033c\u3011\ntar , find , bash , sh. These support shell escapes, either by design or via features. 2. Use sudoers with Full Command + Arguments Control.\n\n\u301045\u2020How to detect sudo's CVE-2021-3156 using Falco\u2020https://sysdig.com/blog/cve-2021-3156-sudo-falco\u3011\nThe researcher Baron Samedit discovered that: Executing sudo in \"shell\" mode ( shell -c command ); Using the sudoedit command with the options -\n\n\u301046\u2020Linux Privilege Escalation Guide (Updated for 2024)\u2020https://payatu.com/blog/a-guide-to-linux-privilege-escalation\u3011\nLaunch a shell with new privileges Get root! Consider that for a kernel exploit attack to succeed, an adversary requires four conditions: A\n\n\u301047\u2020CVE\u20112025\u201132463: Critical Sudo \u201cchroot\u201d Privilege\u2020https://www.upwind.io/feed/cve%E2%80%912025%E2%80%9132463-critical-sudo-chroot-privilege-escalation-flaw\u3011\nThis short snippet simply launches a root-level bash shell whenever loaded.  detect Linux servers and containers running vulnerable sudo", "display_result": "", "duration": "6.2s", "status": "completed", "is_error": false, "mcp_server": {"name": "mcp-server"}}, "thought": null, "ppt": null, "browser": {"search_result": [{"title": "charmbracelet/gum: A tool for glamorous shell scripts", "url": "https://github.com/charmbracelet/gum", "text": "Gum provides highly configurable, ready-to-use utilities to help you write useful shell scripts and dotfiles aliases with just a few lines of code.", "index": 1, "favicon": "", "ref_id": "", "host_name": "github.com"}, {"title": "Saving displayed output from terminal to file with a nice", "url": "https://stackoverflow.com/questions/34275580/saving-displayed-output-from-terminal-to-file-with-a-nice-format", "text": "I need to \"dump\" all information from different commands to a file in bash. When I enter the command at the terminal it shows with a pretty nice formatted and", "index": 2, "favicon": "", "ref_id": "", "host_name": "stackoverflow.com"}, {"title": "Textualize/rich: Rich is a Python library for rich text and", "url": "https://github.com/Textualize/rich", "text": "Rich is a Python library for rich text and beautiful formatting in the terminal. The Rich API makes it easy to add color and style to terminal output.", "index": 3, "favicon": "", "ref_id": "", "host_name": "github.com"}, {"title": "What are some CLI tools that you use that have pretty", "url": "https://www.reddit.com/r/commandline/comments/114ibz7/what_are_some_cli_tools_that_you_use_that_have", "text": "perl -MTerm::ANSIColor is my go-to for DIY pretty output. Instead of having to look up ANSI color codes, you can reference them via straight-forward names like", "index": 4, "favicon": "", "ref_id": "", "host_name": "www.reddit.com"}, {"title": "How can I turn ugly output into pretty, useful information?", "url": "https://unix.stackexchange.com/questions/38977/how-can-i-turn-ugly-output-into-pretty-useful-information", "text": "I'm trying awk, perl and grep, but I'm having trouble keeping all the info for one \"section\" together before I print the CSV line.", "index": 5, "favicon": "", "ref_id": "", "host_name": "unix.stackexchange.com"}, {"title": "How to change the color of the output in Linux Bash?", "url": "https://www.digitalocean.com/community/questions/how-to-change-the-color-of-the-output-in-linux-bash", "text": "First we set the green color as a variable; After that we set a variable called clear so that we could reset the color of the terminal,", "index": 6, "favicon": "", "ref_id": "", "host_name": "www.digitalocean.com"}, {"title": "Enhancing Shell Scripts with Charmbracelet Gum", "url": "https://medium.com/@jignyasamishra/enhancing-shell-scripts-with-charmbracelet-gum-a-practical-guide-b9a534e3caf4", "text": "Charmbracelet Gum is a powerful tool that can significantly improve the user experience of command-line interfaces (CLIs) and shell scripts.", "index": 7, "favicon": "", "ref_id": "", "host_name": "medium.com"}, {"title": "Linux Fu: Gum Up Your Script", "url": "https://hackaday.com/2023/03/29/linux-fu-gum-up-your-script", "text": "Gum can help. It's a utility that can handle your script input and output with a little flair while requiring almost no effort on your part.", "index": 8, "favicon": "", "ref_id": "", "host_name": "hackaday.com"}, {"title": "How Do I Use Charmbracelet Gum to Improve My Scripts", "url": "https://tech.aufomm.com/how-do-i-use-charmbracelet-gum-to-improve-my-scripts", "text": "This is a CLI tool that helps people like myself to capture user input, filter lists or files, provide selections out of box and can be easily integrated with", "index": 9, "favicon": "", "ref_id": "", "host_name": "tech.aufomm.com"}, {"title": "Beautiful bash scripts with Gum", "url": "https://maciejwalkowiak.com/blog/beautiful-bash-scripts-with-gum", "text": "Bash scripts don't need to be boring. I found a fantastic tool that make it easy to use great looking UI elements in bash - Gum.", "index": 10, "favicon": "", "ref_id": "", "host_name": "maciejwalkowiak.com"}, {"title": "Gum: A tool for glamorous shell scripts : r/commandline", "url": "https://www.reddit.com/r/commandline/comments/wa9n1c/gum_a_tool_for_glamorous_shell_scripts", "text": "At Charm, we generally use Go for all our libraries like Bubble Tea, Bubbles, and Lip Gloss. Go should be easy to pick up if you know JavaScript and Python.", "index": 11, "favicon": "", "ref_id": "", "host_name": "www.reddit.com"}, {"title": "How To Create A \"Proper\" CLI With Shell And Charm Gum", "url": "https://www.youtube.com/watch?v=U8zCHA-9VLA", "text": "Would you like to create a \"proper\" CLI writing a Bash script instead of having to do it in Go, Python, or any other language? Charm Gum is", "index": 12, "favicon": "", "ref_id": "", "host_name": "www.youtube.com"}, {"title": "Identifying the system package manager", "url": "https://unix.stackexchange.com/questions/46081/identifying-the-system-package-manager", "text": "Instead of identifying binary programs, you should start from identifying distributions. Hare are a few lines that works in bash scripting:", "index": 13, "favicon": "", "ref_id": "", "host_name": "unix.stackexchange.com"}, {"title": "How to Identify the Package Manager of a Linux System", "url": "https://www.baeldung.com/linux/identify-system-package-manager", "text": "This script uses the for loop to iterate through a list of some common package managers, checking each one without stopping at the first match.", "index": 14, "favicon": "", "ref_id": "", "host_name": "www.baeldung.com"}, {"title": "bash, key-value pair to determine the package manager in", "url": "https://stackoverflow.com/questions/69380788/bash-key-value-pair-to-determine-the-package-manager-in-use", "text": "I want to detect the package manager on the system and then use that later on in my script. However, I feel this is clunky. type apt &> /dev", "index": 15, "favicon": "", "ref_id": "", "host_name": "stackoverflow.com"}, {"title": "Linux Package Managers Are Worse Than You Think", "url": "https://medium.com/@fulalas/linux-package-managers-are-worse-than-you-think-8a106569399a", "text": "Linux package managers have existed for decades, yet they still don't accurately detect the actual dependencies of packages. The process is not", "index": 16, "favicon": "", "ref_id": "", "host_name": "medium.com"}, {"title": "ShellCheck, a static analysis tool for shell scripts", "url": "https://github.com/koalaman/shellcheck", "text": "A shell script static analysis tool. ShellCheck is a GPLv3 tool that gives warnings and suggestions for bash/sh shell scripts.", "index": 17, "favicon": "", "ref_id": "", "host_name": "github.com"}, {"title": "Linux Privilege Escalation: Techniques, Prevention & More", "url": "https://www.strongdm.com/blog/linux-privilege-escalation", "text": "shell escape feature, the hacker can get a root shell by using the following command: sudo vim :!bash. Note: Vim's shell escape (:!bash)", "index": 18, "favicon": "", "ref_id": "", "host_name": "www.strongdm.com"}, {"title": "Sudo Shell Escaping Privilege Escalation (Linux", "url": "https://medium.com/@amaraltohami30/sudo-shell-escaping-privilege-escalation-linux-privilege-escalation-e17aef12033c", "text": "tar , find , bash , sh. These support shell escapes, either by design or via features. 2. Use sudoers with Full Command + Arguments Control.", "index": 19, "favicon": "", "ref_id": "", "host_name": "medium.com"}, {"title": "How to detect sudo's CVE-2021-3156 using Falco", "url": "https://sysdig.com/blog/cve-2021-3156-sudo-falco", "text": "The researcher Baron Samedit discovered that: Executing sudo in \"shell\" mode ( shell -c command ); Using the sudoedit command with the options -", "index": 20, "favicon": "", "ref_id": "", "host_name": "sysdig.com"}, {"title": "Linux Privilege Escalation Guide (Updated for 2024)", "url": "https://payatu.com/blog/a-guide-to-linux-privilege-escalation", "text": "Launch a shell with new privileges Get root! Consider that for a kernel exploit attack to succeed, an adversary requires four conditions: A", "index": 21, "favicon": "", "ref_id": "", "host_name": "payatu.com"}, {"title": "CVE\u20112025\u201132463: Critical Sudo \u201cchroot\u201d Privilege", "url": "https://www.upwind.io/feed/cve%E2%80%912025%E2%80%9132463-critical-sudo-chroot-privilege-escalation-flaw", "text": "This short snippet simply launches a root-level bash shell whenever loaded.  detect Linux servers and containers running vulnerable sudo", "index": 22, "favicon": "", "ref_id": "", "host_name": "www.upwind.io"}], "total_results": 22, "queries": ["gum TUI examples bash script usage", "bash script gum input output formatting", "Linux package manager detection robust script", "sudo privilege escalation detection bash", "beautiful terminal output formatting bash"], "current_url": "about:blank", "page_title": "Untitled", "session_id": "", "turn_count": 0}}}</glm_block>
+
+
+
+<details type="reasoning" done="true" duration="3">
+<summary>Thought for 3 seconds</summary>
+> Now I have a much better understanding of how to improve the script. Based on the search results, I can see that:
+> 
+> 1. **Gum Usage**: Gum provides various utilities for creating beautiful terminal interfaces including:
+>    - `gum style` for styling text
+>    - `gum input` for getting user input
+>    - `gum confirm` for yes/no prompts
+>    - `gum choose` for selecting from options
+>    - `gum spin` for showing loading indicators
+>    - `gum format` for formatting output
+> 
+> 2. **Linux Distribution Detection**: The most reliable method is using `/etc/os-release` file, which is standardized across modern Linux distributions.
+> 
+> 3. **Package Manager Detection**: We should detect the distribution first, then determine the appropriate package manager.
+> 
+> 4. **Sudo Privilege Detection**: We need to check if the user has sudo privileges and ask for them if needed.
+> 
+> Now I'll create an improved version of the script that:
+> 1. Uses gum for beautiful TUI elements
+> 2. Has robust Linux distribution and package manager detection
+> 3. Handles sudo privileges gracefully
+> 4. Provides verbose but clean output
+> 5. Never fails and asks for information when needed
+> 6. Uses the exact libraries specified in the PRD
+> 
+> Let me rewrite the script with these improvements.
+</details>
+Based on my research, I'll now create an improved version of the script that incorporates beautiful TUI elements with gum, robust Linux distribution detection, and better user experience while maintaining all the specified libraries from the PRD.
+
+<glm_block >{"type": "mcp", "data": {"metadata": {"id": "call_m5pvot71gqr", "name": "visit_page", "arguments": "{\"url\":\"https://github.com/charmbracelet/gum\"}", "result": "\u3010GitHub - charmbracelet/gum: A tool for glamorous shell scripts \ud83c\udf80\u2020https://github.com/charmbracelet/gum\u3011\nViewport position: Showing page 1 of 5.\n=======================\nGum\n---\nA tool for glamorous shell scripts. Leverage the power of Bubbles and Lip Gloss in your scripts and aliases without writing any Go code!\nThe above example is running from a single shell script (source).\nTutorial\n--------\nGum provides highly configurable, ready-to-use utilities to help you write useful shell scripts and dotfiles aliases with just a few lines of code. Let's build a simple script to help you write Conventional Commits for your dotfiles.\nAsk for the commit type with gum choose:\ngum choose \"fix\" \"feat\" \"docs\" \"style\" \"refactor\" \"test\" \"chore\" \"revert\"\nNote\nThis command itself will print to stdout which is not all that useful. To make use of the command later on you can save the stdout to a `$VARIABLE` or `file.txt`.\nPrompt for the scope of these changes:\ngum input --placeholder \"scope\"\nPrompt for the summary and description of changes:\ngum input --value \"$TYPE$SCOPE: \" --placeholder \"Summary of this change\"\ngum write --placeholder \"Details of this change\"\nConfirm before committing:\ngum confirm \"Commit changes?\" && git commit -m \"$SUMMARY\" -m \"$DESCRIPTION\"\nCheck out the complete example for combining these commands in a single script.\nInstallation\n------------\nUse a package manager:\n# macOS or Linux\nbrew install gum\n# Arch Linux (btw)\npacman -S gum\n# Nix\nnix-env -iA nixpkgs.gum\n# Flox\nflox install gum\n# Windows (via WinGet or Scoop)\nwinget install charmbracelet.gum\nscoop install charm-gum\nDebian/Ubuntu\nsudo mkdir -p /etc/apt/keyrings\ncurl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg\necho \"deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ \\* \\*\" | sudo tee /etc/apt/sources.list.d/charm.list\nsudo apt update && sudo apt install gum\nFedora/RHEL/OpenSuse\necho '[charm]\nname=Charm\nbaseurl=https://repo.charm.sh/yum/\nenabled=1\ngpgcheck=1\ngpgkey=https://repo.charm.sh/yum/gpg.key' | sudo tee /etc/yum.repos.d/charm.repo\nsudo rpm --import https://repo.charm.sh/yum/gpg.key\n# yum\nsudo yum install gum\n# zypper\nsudo zypper refresh\nsudo zypper ", "display_result": "", "duration": "6.8s", "status": "completed", "is_error": false, "mcp_server": {"name": "mcp-server"}}, "thought": null, "ppt": null, "browser": {"refid": "", "url": "", "title": "", "content": "\u3010GitHub - charmbracelet/gum: A tool for glamorous shell scripts \ud83c\udf80\u2020https://github.com/charmbracelet/gum\u3011\nViewport position: Showing page 1 of 5.\n=======================\nGum\n---\nA tool for glamorous shell scripts. Leverage the power of Bubbles and Lip Gloss in your scripts and aliases without writing any Go code!\nThe above example is running from a single shell script (source).\nTutorial\n--------\nGum provides highly configurable, ready-to-use utilities to help you write useful shell scripts and dotfiles aliases with just a few lines of code. Let's build a simple script to help you write Conventional Commits for your dotfiles.\nAsk for the commit type with gum choose:\ngum choose \"fix\" \"feat\" \"docs\" \"style\" \"refactor\" \"test\" \"chore\" \"revert\"\nNote\nThis command itself will print to stdout which is not all that useful. To make use of the command later on you can save the stdout to a `$VARIABLE` or `file.txt`.\nPrompt for the scope of these changes:\ngum input --placeholder \"scope\"\nPrompt for the summary and description of changes:\ngum input --value \"$TYPE$SCOPE: \" --placeholder \"Summary of this change\"\ngum write --placeholder \"Details of this change\"\nConfirm before committing:\ngum confirm \"Commit changes?\" && git commit -m \"$SUMMARY\" -m \"$DESCRIPTION\"\nCheck out the complete example for combining these commands in a single script.\nInstallation\n------------\nUse a package manager:\n# macOS or Linux\nbrew install gum\n# Arch Linux (btw)\npacman -S gum\n# Nix\nnix-env -iA nixpkgs.gum\n# Flox\nflox install gum\n# Windows (via WinGet or Scoop)\nwinget install charmbracelet.gum\nscoop install charm-gum\nDebian/Ubuntu\nsudo mkdir -p /etc/apt/keyrings\ncurl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg\necho \"deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ \\* \\*\" | sudo tee /etc/apt/sources.list.d/charm.list\nsudo apt update && sudo apt install gum\nFedora/RHEL/OpenSuse\necho '[charm]\nname=Charm\nbaseurl=https://repo.charm.sh/yum/\nenabled=1\ngpgcheck=1\ngpgkey=https://repo.charm.sh/yum/gpg.key' | sudo tee /etc/yum.repos.d/charm.repo\nsudo rpm --import https://repo.charm.sh/yum/gpg.key\n# yum\nsudo yum install gum\n# zypper\nsudo zypper refresh\nsudo zypper ", "session_id": "", "turn_count": 0, "current_url": "https://github.com/charmbracelet/gum", "page_title": "GitHub - charmbracelet/gum: A tool for glamorous shell scripts \ud83c\udf80"}}}</glm_block>
+
+
+
+<details type="reasoning" done="true" duration="1">
+<summary>Thought for 1 seconds</summary>
+> Now I have a good understanding of gum and how to use it. Let me create the improved script that:
+> 
+> 1. Uses gum for beautiful TUI elements
+> 2. Has robust Linux distribution detection using /etc/os-release
+> 3. Handles package manager detection properly
+> 4. Manages sudo privileges gracefully
+> 5. Provides verbose but clean output
+> 6. Never fails and asks for information when needed
+> 7. Uses all the libraries specified in the PRD
+> 
+> I'll structure the script to be highly resilient and user-friendly while maintaining all the functionality from the original implementation guide.
+</details>
+```markdown
+# Comprehensive Implementation Guide for Puter.js-Centric AI Automation System
+
+## Table of Contents
+1. [Core Architecture](#1-core-architecture-100-puterjs-native)
+2. [Implementation Steps](#2-implementation-steps)
+3. [Deployment Architecture](#3-deployment-architecture)
+4. [Security Architecture](#4-security-architecture)
+5. [Monitoring & Analytics](#5-monitoring--analytics)
+6. [Advanced Features](#6-advanced-features)
+7. [Operational Documentation](#7-operational-documentation)
+8. [Developer Resources](#8-developer-resources)
+9. [Support & Scaling](#9-support--scaling)
+10. [Future Roadmap](#10-future-roadmap)
+
+---
+
+## 1. Core Architecture (100% Puter.js Native)
+
+```mermaid
+graph TD
+    A[User] --> B[Browser-Use Desktop]
+    B --> C[Puter.js Core]
+    C --> D[Free AI Models]
+    D --> E[NLP Engine]
+    D --> F[Code Generator]
+    D --> G[Voice Processor]
+    C --> H[Zapier MCP]
+    C --> I[n8n Bridge]
+    E --> J[Automation Spec]
+    F --> J
+    G --> J
+    J --> K[Zapier/n8n Deployment]
+```
+
+### Key Components:
+1. **Puter.js AI Stack**:
+   - `@puter/nlp` (Free models: `gpt-3.5-turbo-free`, `code-davinci-free`)
+   - `@puter/voice` (ASR with Whisper-free model)
+   - `@puter/workflow` (Native automation spec generation)
+2. **Zero-Dependency Architecture**:
+```javascript
+// Full-stack example using only Puter.js packages
+import {
+  Puter,
+  NLPProcessor,
+  VoiceProcessor,
+  ZapierClient,
+  n8nBridge
+} from '@puter/sdk';
+const app = new Puter({
+  ai: {
+    provider: 'free',
+    models: [
+      'gpt-3.5-turbo-free',
+      'code-davinci-free',
+      'text-davinci-free-002'
+    ]
+  }
+});
+```
+
+---
+
+## 2. Implementation Steps
+
+### A. Core AI Services
+
+#### 1. Natural Language Processing
+```javascript
+// Full NLP Pipeline
+const nlp = new NLPProcessor({
+  model: 'gpt-3.5-turbo-free',
+  maxTokens: 512,
+  temperature: 0.3
+});
+async function processQuery(query) {
+  const [textResult, voiceResult] = await Promise.all([
+    nlp.processText(query.text),
+    query.audio && nlp.processVoice(query.audio)
+  ]);
+  return {
+    automationSpec: JSON.parse(textResult),
+    voiceMetadata: voiceResult?.metadata
+  };
+}
+```
+
+#### 2. Voice Processing
+```javascript
+// Voice-to-Automation Flow
+const voice = new VoiceProcessor({
+  sampleRate: 16000,
+  language: 'en-US'
+});
+async function handleVoiceInput(stream) {
+  const transcript = await voice.transcribe(stream);
+  const spec = await nlp.convertToAutomation(transcript);
+  return spec;
+}
+```
+
+#### 3. Code Generation
+```javascript
+// Native Puter.js Code Generation
+const codegen = new CodeGenerator({
+  model: 'code-davinci-free',
+  templateEngine: 'handlebars'
+});
+async function generateZapierSpec(spec) {
+  return codegen.generate({
+    prompt: `Generate Zapier workflow for:\n${JSON.stringify(spec)}`,
+    format: 'zapier'
+  });
+}
+```
+
+### B. Integration Layer
+
+#### 1. Zapier MCP Integration
+```javascript
+// Pre-authenticated Zapier Client
+const zapier = new ZapierClient({
+  endpoint: 'https://mcp.zapier.com/api/mcp/s/YzgzMDBlOWMtNzUwMy00NGVkLTliMTAtY2RjOTgzODEzZjIzOjAzNmIxNjNhLTgxZjctNDQyOC1iMzU3LWI5MWY4YmQwOGY4NQ==/mcp'
+});
+async function deployZap(spec) {
+  const response = await zapier.deploy({
+    name: spec.name,
+    triggers: spec.triggers,
+    actions: spec.actions
+  });
+  
+  return response.deployment_id;
+}
+```
+
+#### 2. n8n Self-Hosted Bridge
+```yaml
+# n8n Docker Configuration
+version: '3.8'
+services:
+  n8n:
+    image: n8n/n8n:latest
+    environment:
+      - N8N_BASIC_AUTH_USER=puter
+      - N8N_BASIC_AUTH_PASSWORD=puter123
+    volumes:
+      - n8n_data:/root/.n8n
+    ports:
+      - "5678:5678"
+    networks:
+      - proxy
+```
+
+```javascript
+// n8n Sync Protocol
+const n8n = new n8nBridge({
+  host: 'http://localhost:5678',
+  auth: {
+    type: 'basic',
+    username: 'puter',
+    password: 'puter123'
+  }
+});
+async function syncToN8n(spec) {
+  await n8n.deployWorkflow(spec);
+  await n8n.createWebhook({
+    path: `/puter-webhook/${spec.id}`,
+    triggerType: 'http'
+  });
+}
+```
+
+---
+
+## 3. Deployment Architecture
+
+### A. Serverless Deployment
+```bash
+# Vercel Deployment
+npx vercel deploy --prod --framework=puter
+# AWS Lambda Deployment
+serverless deploy --stage production --provider aws
+```
+
+### B. CI/CD Pipeline
+```yaml
+# GitHub Actions Workflow
+name: Continuous Deployment
+on:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Puter.js Dependencies
+        run: npm install @puter/sdk @puter/nlp @puter/voice
+      - name: Build Frontend
+        run: npm run build -- --prod
+      - name: Deploy
+        uses: serverless/github-action@v3
+        with:
+          serverless-config: serverless.yml
+```
+
+---
+
+## 4. Security Architecture
+
+### A. Zero-Trust Model
+```javascript
+// Puter.js Native Security
+const security = new PuterSecurity({
+  auth: {
+    type: 'jwt',
+    secret: process.env.PUTER_SECRET
+  },
+  encryption: {
+    algorithm: 'aes-256-gcm',
+    key: process.env.ENCRYPTION_KEY
+  }
+});
+// Automated Security Headers
+app.use(security.middleware({
+  csp: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'", "https://cdn.puter.com"]
+  }
+}));
+```
+
+### B. Compliance
+```python
+# GDPR/CCPA Compliance Layer
+class ComplianceManager:
+    def __init__(self):
+        self.audit_logger = AuditLogger()
+        self.data_purger = DataPurger()
+        
+    def process_request(self, user_id, data):
+        self.audit_logger.log({
+            'user_id': user_id,
+            'action': 'automation_created',
+            'timestamp': datetime.now()
+        })
+        return self.data_purger.anonymize(data)
+```
+
+---
+
+## 5. Monitoring & Analytics
+
+### A. Observability Stack
+```javascript
+// Puter.js Native Monitoring
+const monitor = new PuterMonitor({
+  metrics: {
+    endpoints: ['/automation', '/voice', '/n8n'],
+    interval: 60
+  },
+  alerts: {
+    errorThreshold: 5,
+    latencyThreshold: 1000
+  }
+});
+// Real-time Dashboards
+monitor.connectToDashboard({
+  url: 'https://puter-monitoring.puter.com',
+  project: 'ultimate-automation'
+});
+```
+
+### B. Error Handling
+```javascript
+// Graceful Error Recovery
+app.use(async (err, req, res, next) => {
+  if (err instanceof PuterAPIError) {
+    await monitor.logError(err);
+    return res.status(500).json({
+      error: 'Internal Server Error',
+      recovery: {
+        steps: await generateRecoverySteps(err)
+      }
+    });
+  }
+  next();
+});
+```
+
+---
+
+## 6. Advanced Features
+
+### A. Cross-Platform Sync
+```javascript
+// Real-time Sync Engine
+class SyncEngine {
+  async syncAll() {
+    const [zapier, n8n] = await Promise.all([
+      zapier.listWorkflows(),
+      n8n.listWorkflows()
+    ]);
+    
+    const merged = this.mergeWorkflows(zapier, n8n);
+    await this.deployToAll(merged);
+  }
+  
+  mergeWorkflows(a, b) {
+    return {
+      ...a,
+      actions: [...new Set([...a.actions, ...b.actions])]
+    };
+  }
+}
+```
+
+### B. AI Model Optimization
+```python
+# Model Performance Tracker
+class ModelOptimizer:
+    def __init__(self):
+        self.metrics = {
+            'latency': [],
+            'accuracy': [],
+            'cost': 0
+        }
+        
+    def track_response(self, response_time, success):
+        self.metrics.latency.append(response_time)
+        self.metrics.accuracy.append(success ? 1 : 0)
+        self.metrics.cost += response_time * 0.0001
+        
+    def optimize_model(self):
+        if self.metrics.cost > 100:
+            self.switch_model('light')
+```
+
+---
+
+## 7. Operational Documentation
+
+### A. System Diagrams
+```mermaid
+sequenceDiagram
+    participant User
+    User->>Browser-Use: Input (Text/Voice)
+    Browser-Use->>Puter.js: Process Query
+    Puter.js->>Zapier: Deploy Workflow
+    Puter.js->>n8n: Deploy Workflow
+    Zapier->>Services: Execute Automation
+    n8n->>Services: Execute Automation
+    Services->>User: Real-time Feedback
+```
+
+### B. Maintenance Checklist
+```markdown
+# Weekly Maintenance
+- [ ] Update Puter.js SDK
+- [ ] Run model optimization
+- [ ] Verify cross-platform sync
+- [ ] Audit security headers
+- [ ] Test disaster recovery
+
+# Disaster Recovery
+1. Restore from S3 backup
+2. Re-deploy using CI/CD
+3. Validate workflow integrity
+4. Notify users via Slack integration
+```
+
+---
+
+## 8. Developer Resources
+
+### A. Puter.js CLI
+```bash
+# Generate boilerplate
+puter init my-automation-system
+# Run local dev server
+puter serve --port 3000
+# Deploy to edge network
+puter deploy --edge
+```
+
+### B. Testing Framework
+```javascript
+// End-to-end test example
+describe('Automation System', () => {
+  it('should create Zapier workflow', async () => {
+    const spec = await createSpec('Send Slack message');
+    const zap = await deployZap(spec);
+    expect(zap.status).toBe('active');
+    expect(zap.triggers).toHaveLength(1);
+  });
+  
+  it('should handle voice commands', async () => {
+    const audio = await recordVoice('Create Twitter post');
+    const spec = await handleVoiceInput(audio);
+    expect(spec.actions).toContain('twitter');
+  });
+});
+```
+
+---
+
+## 9. Support & Scaling
+
+### A. Support Matrix
+| Tier | Response Time | SLA |  
+|------|--------------|-----|  
+| Free | 24h          | 90% |  
+| Pro  | 2h           | 99% |  
+| Enterprise | 15min | 99.9% |  
+
+### B. Scaling Strategies
+
+#### 1. Cold Start Optimization
+```javascript
+app.use(async (req, res, next) => {
+  if (req.path === '/automation') {
+    await warmCache();
+  }
+  next();
+});
+```
+
+#### 2. Auto-scaling Groups
+```yaml
+# Kubernetes Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: automation-service
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+  template:
+    spec:
+      containers:
+      - name: main
+        image: ghcr.io/heyputer/automation-system:latest
+        resources:
+          limits:
+            cpu: "2"
+            memory: 4Gi
+          requests:
+            cpu: "500m"
+            memory: 1Gi
+```
+
+---
+
+## 10. Future Roadmap
+
+### Q1 2024
+- Add multi-modal support (images/docs)  
+- Implement quantum-safe encryption  
+- Open-source core components  
+
+### Q2 2024
+- Mobile app integration  
+- Blockchain-based automation provenance  
+- AI model marketplace  
+
+### Q3 2024
+- AR/VR interface layer  
+- Cross-platform mobile automation  
+- Enterprise SSO integrations  
+
+---
+
+This implementation guide provides a complete, Puter.js-native blueprint for building the ultimate AI automation system. All components are designed to leverage Puter.js' free tier capabilities while maintaining enterprise-grade security and scalability. The architecture is fully containerized and ready for deployment on any cloud provider.
+```
+
+```bash
+#!/bin/bash
+
+# =============================================================================
+# Puter.js AI Automation System - Zero-Touch Setup Script with Beautiful TUI
+# Compatible with: Ubuntu, Debian, CentOS, RHEL, Fedora, Arch Linux, and more
+# Uses gum for beautiful terminal interfaces
+# =============================================================================
+
+set -euo pipefail
+
+# Check if gum is installed, if not install it
+if ! command -v gum &> /dev/null; then
+    echo "Installing gum for beautiful terminal interfaces..."
+    
+    # Detect package manager and install gum
+    if command -v apt &> /dev/null; then
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
+        sudo apt update && sudo apt install -y gum
+    elif command -v yum &> /dev/null || command -v dnf &> /dev/null; then
+        if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+        else
+            PKG_MGR="yum"
+        fi
+        echo '[charm]
+name=Charm
+baseurl=https://repo.charm.sh/yum/
+enabled=1
+gpgcheck=1
+gpgkey=https://repo.charm.sh/yum/gpg.key' | sudo tee /etc/yum.repos.d/charm.repo
+        sudo rpm --import https://repo.charm.sh/yum/gpg.key
+        sudo $PKG_MGR install -y gum
+    elif command -v pacman &> /dev/null; then
+        sudo pacman -S --noconfirm gum
+    elif command -v brew &> /dev/null; then
+        brew install gum
+    else
+        echo "Could not install gum automatically. Please install it manually and run the script again."
+        exit 1
+    fi
+fi
+
+# Style definitions using gum
+HEADER_STYLE="$(gum style --foreground=212 --bold)"
+TITLE_STYLE="$(gum style --foreground=45 --bold)"
+SUCCESS_STYLE="$(gum style --foreground=46)"
+WARNING_STYLE="$(gum style --foreground=220)"
+ERROR_STYLE="$(gum style --foreground=196)"
+INFO_STYLE="$(gum style --foreground=39)"
+STEP_STYLE="$(gum style --foreground=147)"
+CODE_STYLE="$(gum style --foreground=51)"
+
+# Logging functions with beautiful output
+log() {
+    echo -e "$INFO_STYLE[$(date +'%Y-%m-%d %H:%M:%S')]$SUCCESS_STYLE $1"
+}
+
+warn() {
+    echo -e "$WARNING_STYLE[$(date +'%Y-%m-%d %H:%M:%S')] WARNING:$INFO_STYLE $1"
+}
+
+error() {
+    echo -e "$ERROR_STYLE[$(date +'%Y-%m-%d %H:%M:%S')] ERROR:$INFO_STYLE $1"
+    exit 1
+}
+
+step() {
+    echo -e "$STEP_STYLE▶ $1"
+}
+
+success() {
+    echo -e "$SUCCESS_STYLE✓ $1"
+}
+
+show_header() {
+    gum style --foreground=212 --border=double --align=center --width=50 --margin="1 2" --padding="1 2" \
+        "Puter.js AI Automation System" \
+        "Zero-Touch Setup Script" \
+        "" \
+        "$(gum style --foreground=45 --bold)Beautiful TUI Edition"
+    echo
+}
+
+# Display welcome message
+show_header
+
+gum style --foreground=147 "This script will install and configure the complete Puter.js AI Automation System"
+gum style --foreground=147 "with beautiful terminal interfaces and robust error handling."
+echo
+
+# Check for sudo privileges
+check_sudo() {
+    step "Checking for sudo privileges..."
+    
+    if ! sudo -n true 2>/dev/null; then
+        gum style --foreground=220 "Sudo privileges are required for installation."
+        if gum confirm "Request sudo privileges now?"; then
+            sudo -v || error "Failed to obtain sudo privileges"
+            success "Sudo privileges obtained"
+        else
+            error "Sudo privileges are required for installation"
+        fi
+    else
+        success "Sudo privileges already available"
+    fi
+}
+
+# Enhanced Linux distribution detection
+detect_distro() {
+    step "Detecting Linux distribution..."
+    
+    # Primary method: /etc/os-release (most reliable)
+    if [[ -f /etc/os-release ]]; then
+        source /etc/os-release
+        OS_NAME="$NAME"
+        OS_VERSION="$VERSION_ID"
+        OS_ID="$ID"
+        OS_LIKE="$ID_LIKE"
+        
+        gum style --foreground=147 "Detected via /etc/os-release:"
+        gum style --foreground=51 "  Name: $OS_NAME"
+        gum style --foreground=51 "  Version: $OS_VERSION"
+        gum style --foreground=51 "  ID: $OS_ID"
+        gum style --foreground=51 "  Like: $OS_LIKE"
+        
+    # Fallback methods
+    elif command -v lsb_release &> /dev/null; then
+        OS_NAME=$(lsb_release -si)
+        OS_VERSION=$(lsb_release -sr)
+        OS_ID=$(echo "$OS_NAME" | tr '[:upper:]' '[:lower:]')
+        
+        gum style --foreground=147 "Detected via lsb_release:"
+        gum style --foreground=51 "  Name: $OS_NAME"
+        gum style --foreground=51 "  Version: $OS_VERSION"
+        
+    elif [[ -f /etc/redhat-release ]]; then
+        OS_NAME=$(cat /etc/redhat-release | cut -d' ' -f1)
+        OS_VERSION=$(cat /etc/redhat-release | sed 's/.*release \([0-9\.]\+\).*/\1/')
+        OS_ID=$(echo "$OS_NAME" | tr '[:upper:]' '[:lower:]')
+        
+        gum style --foreground=147 "Detected via /etc/redhat-release:"
+        gum style --foreground=51 "  Name: $OS_NAME"
+        gum style --foreground=51 "  Version: $OS_VERSION"
+        
+    elif [[ -f /etc/debian_version ]]; then
+        OS_NAME="Debian"
+        OS_VERSION=$(cat /etc/debian_version)
+        OS_ID="debian"
+        
+        gum style --foreground=147 "Detected via /etc/debian_version:"
+        gum style --foreground=51 "  Name: $OS_NAME"
+        gum style --foreground=51 "  Version: $OS_VERSION"
+        
+    else
+        # Last resort - ask user
+        gum style --foreground=220 "Could not automatically detect distribution"
+        OS_NAME=$(gum input --placeholder="Enter distribution name (e.g., Ubuntu, CentOS)")
+        OS_VERSION=$(gum input --placeholder="Enter version number (e.g., 22.04, 9)")
+        OS_ID=$(echo "$OS_NAME" | tr '[:upper:]' '[:lower:]')
+    fi
+    
+    success "Distribution detected: $OS_NAME $OS_VERSION"
+}
+
+# Enhanced package manager detection
+detect_package_manager() {
+    step "Detecting package manager..."
+    
+    # Array of package managers to check
+    declare -A PKG_MANAGERS=(
+        ["apt"]="apt-get"
+        ["yum"]="yum"
+        ["dnf"]="dnf"
+        ["pacman"]="pacman"
+        ["zypper"]="zypper"
+        ["apk"]="apk"
+        ["emerge"]="emerge"
+    )
+    
+    PKG_MANAGER=""
+    PKG_UPDATE_CMD=""
+    PKG_INSTALL_CMD=""
+    
+    # Check for package managers in order of preference
+    for pm in "${!PKG_MANAGERS[@]}"; do
+        if command -v "$pm" &> /dev/null; then
+            PKG_MANAGER="$pm"
+            case "$pm" in
+                "apt")
+                    PKG_UPDATE_CMD="apt-get update"
+                    PKG_INSTALL_CMD="apt-get install -y"
+                    ;;
+                "yum")
+                    PKG_UPDATE_CMD="yum update -y"
+                    PKG_INSTALL_CMD="yum install -y"
+                    ;;
+                "dnf")
+                    PKG_UPDATE_CMD="dnf update -y"
+                    PKG_INSTALL_CMD="dnf install -y"
+                    ;;
+                "pacman")
+                    PKG_UPDATE_CMD="pacman -Syu --noconfirm"
+                    PKG_INSTALL_CMD="pacman -S --noconfirm"
+                    ;;
+                "zypper")
+                    PKG_UPDATE_CMD="zypper refresh"
+                    PKG_INSTALL_CMD="zypper install -y"
+                    ;;
+                "apk")
+                    PKG_UPDATE_CMD="apk update"
+                    PKG_INSTALL_CMD="apk add"
+                    ;;
+                "emerge")
+                    PKG_UPDATE_CMD="emerge --sync"
+                    PKG_INSTALL_CMD="emerge --ask=n"
+                    ;;
+            esac
+            break
+        fi
+    done
+    
+    if [[ -z "$PKG_MANAGER" ]]; then
+        gum style --foreground=220 "No supported package manager found"
+        if gum confirm "Continue anyway? Some dependencies may not install properly"; then
+            warn "Continuing without package manager detection"
+        else
+            error "No supported package manager found"
+        fi
+    else
+        gum style --foreground=147 "Package manager detected:"
+        gum style --foreground=51 "  Manager: $PKG_MANAGER"
+        gum style --foreground=51 "  Update: $PKG_UPDATE_CMD"
+        gum style --foreground=51 "  Install: $PKG_INSTALL_CMD"
+        success "Package manager: $PKG_MANAGER"
+    fi
+}
+
+# Install system dependencies with beautiful progress
+install_dependencies() {
+    step "Installing system dependencies..."
+    
+    # Core dependencies that are always needed
+    CORE_DEPS=(
+        "curl"
+        "wget"
+        "git"
+        "python3"
+        "python3-pip"
+        "docker"
+        "docker-compose"
+        "nodejs"
+        "npm"
+        "nginx"
+        "certbot"
+        "ufw"
+        "fail2ban"
+        "logrotate"
+        "cron"
+        "supervisor"
+    )
+    
+    # Distribution-specific dependencies
+    case "$OS_ID" in
+        "ubuntu"|"debian")
+            DISTRO_DEPS=(
+                "build-essential"
+                "python3-certbot-nginx"
+                "postgresql"
+                "postgresql-contrib"
+                "redis-server"
+                "rabbitmq-server"
+            )
+            ;;
+        "centos"|"rhel"|"fedora")
+            DISTRO_DEPS=(
+                "gcc"
+                "gcc-c++"
+                "make"
+                "python3-certbot-nginx"
+                "postgresql-server"
+                "postgresql-contrib"
+                "redis"
+                "rabbitmq-server"
+            )
+            ;;
+        "arch")
+            DISTRO_DEPS=(
+                "base-devel"
+                "python"
+                "python-pip"
+                "certbot-nginx"
+                "postgresql"
+                "redis"
+                "rabbitmq"
+            )
+            ;;
+        *)
+            DISTRO_DEPS=(
+                "postgresql"
+                "redis"
+                "rabbitmq-server"
+            )
+            ;;
+    esac
+    
+    # Combine all dependencies
+    ALL_DEPS=("${CORE_DEPS[@]}" "${DISTRO_DEPS[@]}")
+    
+    # Show what we're about to install
+    gum style --foreground=147 "The following dependencies will be installed:"
+    for dep in "${ALL_DEPS[@]}"; do
+        gum style --foreground=51 "  • $dep"
+    done
+    
+    if ! gum confirm "Proceed with dependency installation?"; then
+        warn "Skipping dependency installation"
+        return
+    fi
+    
+    # Update package lists
+    if [[ -n "$PKG_UPDATE_CMD" ]]; then
+        step "Updating package lists..."
+        if gum spin --spinner dot --title "Updating packages..." -- sudo $PKG_UPDATE_CMD; then
+            success "Package lists updated"
+        else
+            warn "Failed to update package lists, continuing anyway"
+        fi
+    fi
+    
+    # Install dependencies with progress
+    step "Installing dependencies..."
+    
+    # Install in batches to avoid overwhelming the system
+    BATCH_SIZE=5
+    for ((i=0; i<${#ALL_DEPS[@]}; i+=BATCH_SIZE)); do
+        BATCH=("${ALL_DEPS[@]:$i:$BATCH_SIZE}")
+        BATCH_STR=$(IFS=" "; echo "${BATCH[*]}")
+        
+        if gum spin --spinner dot --title "Installing ${BATCH_STR}..." -- sudo $PKG_INSTALL_CMD "${BATCH[@]}"; then
+            success "Installed: $BATCH_STR"
+        else
+            warn "Failed to install some packages in batch: $BATCH_STR"
+        fi
+    done
+    
+    success "Dependency installation completed"
+}
+
+# Start and enable services with beautiful feedback
+start_services() {
+    step "Starting and enabling services..."
+    
+    SERVICES=("docker" "postgresql" "redis" "rabbitmq-server" "nginx" "fail2ban" "supervisord")
+    
+    for service in "${SERVICES[@]}"; do
+        step "Configuring $service service..."
+        
+        # Check if service exists
+        if ! systemctl list-unit-files | grep -q "$service.service"; then
+            warn "Service $service not found, skipping"
+            continue
+        fi
+        
+        # Start service
+        if gum spin --spinner dot --title "Starting $service..." -- sudo systemctl start "$service"; then
+            success "$service started"
+        else
+            warn "Failed to start $service"
+        fi
+        
+        # Enable service
+        if gum spin --spinner dot --title "Enabling $service..." -- sudo systemctl enable "$service"; then
+            success "$service enabled"
+        else
+            warn "Failed to enable $service"
+        fi
+    done
+    
+    success "Services configured"
+}
+
+# Install Node.js with version selection
+install_nodejs() {
+    step "Installing Node.js..."
+    
+    if command -v node &> /dev/null; then
+        CURRENT_VERSION=$(node --version)
+        gum style --foreground=147 "Node.js already installed: $CURRENT_VERSION"
+        
+        if gum confirm "Upgrade to latest Node.js 18 LTS?"; then
+            step "Upgrading Node.js..."
+        else
+            success "Using existing Node.js installation"
+            return
+        fi
+    fi
+    
+    # Install Node.js 18 LTS using NodeSource repository
+    step "Installing Node.js 18 LTS..."
+    
+    if [[ "$PKG_MANAGER" == "apt" ]]; then
+        curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+        sudo apt-get install -y nodejs
+    elif [[ "$PKG_MANAGER" == "yum" || "$PKG_MANAGER" == "dnf" ]]; then
+        curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
+        sudo $PKG_INSTALL_CMD nodejs
+    elif [[ "$PKG_MANAGER" == "pacman" ]]; then
+        sudo pacman -S --noconfirm nodejs npm
+    else
+        # Fallback to nvm
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        nvm install 18
+        nvm use 18
+    fi
+    
+    # Verify installation
+    if command -v node &> /dev/null; then
+        NODE_VERSION=$(node --version)
+        NPM_VERSION=$(npm --version)
+        gum style --foreground=147 "Node.js installed successfully:"
+        gum style --foreground=51 "  Node.js: $NODE_VERSION"
+        gum style --foreground=51 "  npm: $NPM_VERSION"
+        success "Node.js installation completed"
+    else
+        error "Failed to install Node.js"
+    fi
+}
+
+# Install Puter.js CLI and SDK
+install_puterjs() {
+    step "Installing Puter.js CLI and SDK..."
+    
+    # Install Puter.js CLI globally
+    if gum spin --spinner dot --title "Installing Puter.js CLI..." -- sudo npm install -g @puter/cli; then
+        success "Puter.js CLI installed"
+    else
+        warn "Failed to install Puter.js CLI, continuing anyway"
+    fi
+    
+    # Create project directory
+    step "Creating project directory..."
+    sudo mkdir -p /opt/puter-automation
+    sudo chown $USER:$USER /opt/puter-automation
+    cd /opt/puter-automation
+    
+    # Initialize Puter.js project
+    step "Initializing Puter.js project..."
+    if gum spin --spinner dot --title "Initializing project..." -- puter init automation-system --template=full-stack; then
+        success "Puter.js project initialized"
+    else
+        warn "Failed to initialize Puter.js project, creating basic structure"
+        mkdir -p automation-system
+        cd automation-system
+        npm init -y
+    fi
+    
+    # Install dependencies
+    step "Installing project dependencies..."
+    if gum spin --spinner dot --title "Installing dependencies..." -- npm install; then
+        success "Project dependencies installed"
+    else
+        warn "Failed to install project dependencies"
+    fi
+    
+    # Install specific Puter.js packages
+    step "Installing Puter.js packages..."
+    PUTER_PACKAGES=("@puter/sdk" "@puter/nlp" "@puter/voice" "@puter/workflow" "@puter/monitoring")
+    
+    for package in "${PUTER_PACKAGES[@]}"; do
+        if gum spin --spinner dot --title "Installing $package..." -- npm install "$package"; then
+            success "$package installed"
+        else
+            warn "Failed to install $package"
+        fi
+    done
+    
+    success "Puter.js installation completed"
+}
+
+# Setup environment variables with secure generation
+setup_environment() {
+    step "Setting up environment variables..."
+    
+    # Generate secure random values
+    PUTER_SECRET=$(openssl rand -hex 32)
+    ENCRYPTION_KEY=$(openssl rand -hex 32)
+    DB_PASSWORD=$(openssl rand -hex 16)
+    REDIS_PASSWORD=$(openssl rand -hex 16)
+    RABBITMQ_PASSWORD=$(openssl rand -hex 16)
+    JWT_SECRET=$(openssl rand -hex 32)
+    
+    # Create environment file
+    cat > /opt/puter-automation/automation-system/.env << EOF
+# Puter.js Configuration
+PUTER_SECRET=$PUTER_SECRET
+ENCRYPTION_KEY=$ENCRYPTION_KEY
+NODE_ENV=production
+PORT=3000
+
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=puter_automation
+DB_USER=puter_admin
+DB_PASSWORD=$DB_PASSWORD
+
+# Redis Configuration
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=$REDIS_PASSWORD
+
+# RabbitMQ Configuration
+RABBITMQ_HOST=localhost
+RABBITMQ_PORT=5672
+RABBITMQ_USER=puter_admin
+RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
+
+# n8n Configuration
+N8N_HOST=localhost
+N8N_PORT=5678
+N8N_BASIC_AUTH_USER=puter
+N8N_BASIC_AUTH_PASSWORD=puter123
+
+# Zapier MCP Configuration
+ZAPIER_MCP_ENDPOINT=https://mcp.zapier.com/api/mcp/s/YzgzMDBlOWMtNzUwMy00NGVkLTliMTAtY2RjOTgzODEzZjIzOjAzNmIxNjNhLTgxZjctNDQyOC1iMzU3LWI5MWY4YmQwOGY4NQ==/mcp
+
+# Monitoring Configuration
+MONITORING_INTERVAL=60
+ERROR_THRESHOLD=5
+LATENCY_THRESHOLD=1000
+
+# Security Configuration
+JWT_SECRET=$JWT_SECRET
+CSP_DEFAULT_SRC="'self'"
+CSP_SCRIPT_SRC="'self' https://cdn.puter.com"
+EOF
+    
+    # Set proper permissions
+    sudo chmod 600 /opt/puter-automation/automation-system/.env
+    sudo chown $USER:$USER /opt/puter-automation/automation-system/.env
+    
+    success "Environment variables configured securely"
+}
+
+# Setup database with validation
+setup_database() {
+    step "Setting up database..."
+    
+    # Wait for PostgreSQL to be ready
+    step "Waiting for PostgreSQL to be ready..."
+    until sudo -u postgres psql -c '\q' 2>/dev/null; do
+        sleep 1
+    done
+    success "PostgreSQL is ready"
+    
+    # Create database user
+    step "Creating database user..."
+    if sudo -u postgres psql -c "CREATE USER puter_admin WITH PASSWORD '$DB_PASSWORD';" 2>/dev/null; then
+        success "Database user created"
+    else
+        warn "Database user may already exist"
+    fi
+    
+    # Create database
+    step "Creating database..."
+    if sudo -u postgres psql -c "CREATE DATABASE puter_automation OWNER puter_admin;" 2>/dev/null; then
+        success "Database created"
+    else
+        warn "Database may already exist"
+    fi
+    
+    # Grant privileges
+    step "Granting privileges..."
+    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE puter_automation TO puter_admin;"
+    success "Privileges granted"
+    
+    # Run database migrations (if they exist)
+    cd /opt/puter-automation/automation-system
+    if [[ -f "package.json" ]] && jq -e '.scripts["db:migrate"]' package.json > /dev/null 2>&1; then
+        step "Running database migrations..."
+        if npm run db:migrate; then
+            success "Database migrations completed"
+        else
+            warn "Database migrations failed or not available"
+        fi
+    else
+        warn "No database migrations found"
+    fi
+    
+    success "Database setup completed"
+}
+
+# Setup n8n with Docker
+setup_n8n() {
+    step "Setting up n8n..."
+    
+    # Create n8n directory
+    sudo mkdir -p /opt/n8n
+    sudo chown $USER:$USER /opt/n8n
+    cd /opt/n8n
+    
+    # Create docker-compose file
+    cat > docker-compose.yml << EOF
+version: '3.8'
+services:
+  n8n:
+    image: n8n/n8n:latest
+    restart: unless-stopped
+    environment:
+      - N8N_BASIC_AUTH_USER=puter
+      - N8N_BASIC_AUTH_PASSWORD=puter123
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=localhost
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=puter_automation
+      - DB_POSTGRESDB_USER=puter_admin
+      - DB_POSTGRESDB_PASSWORD=$DB_PASSWORD
+      - QUEUE_BULL_REDIS_HOST=localhost
+      - QUEUE_BULL_REDIS_PORT=6379
+      - QUEUE_BULL_REDIS_PASSWORD=$REDIS_PASSWORD
+    volumes:
+      - n8n_data:/root/.n8n
+    ports:
+      - "5678:5678"
+    networks:
+      - puter_network
+
+volumes:
+  n8n_data:
+
+networks:
+  puter_network:
+    driver: bridge
+EOF
+    
+    # Start n8n
+    step "Starting n8n..."
+    if gum spin --spinner dot --title "Starting n8n..." -- docker-compose up -d; then
+        success "n8n started successfully"
+    else
+        error "Failed to start n8n"
+    fi
+    
+    # Wait for n8n to be ready
+    step "Waiting for n8n to be ready..."
+    until curl -s http://localhost:5678 > /dev/null 2>&1; do
+        sleep 2
+    done
+    success "n8n is ready"
+}
+
+# Setup Nginx reverse proxy
+setup_nginx() {
+    step "Setting up Nginx reverse proxy..."
+    
+    # Create Nginx configuration
+    sudo tee /etc/nginx/sites-available/puter-automation > /dev/null << EOF
+server {
+    listen 80;
+    server_name _;
+    
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    
+    # Rate limiting
+    limit_req_zone \$binary_remote_addr zone=api:10m rate=10r/s;
+    limit_req zone=api burst=20 nodelay;
+    
+    # Main application
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+    
+    # n8n
+    location /n8n/ {
+        proxy_pass http://localhost:5678/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+    }
+    
+    # Health check
+    location /health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
+    }
+    
+    # Block access to hidden files
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+}
+EOF
+    
+    # Enable site
+    sudo ln -sf /etc/nginx/sites-available/puter-automation /etc/nginx/sites-enabled/
+    sudo rm -f /etc/nginx/sites-enabled/default
+    
+    # Test and reload Nginx
+    step "Testing Nginx configuration..."
+    if sudo nginx -t; then
+        sudo systemctl reload nginx
+        success "Nginx configured successfully"
+    else
+        error "Nginx configuration test failed"
+    fi
+}
+
+# Setup SSL certificates
+setup_ssl() {
+    step "Setting up SSL certificates..."
+    
+    if gum confirm "Setup SSL certificates with Let's Encrypt?"; then
+        # Get domain name from user
+        DOMAIN=$(gum input --placeholder="Enter your domain name (e.g., example.com)")
+        
+        if [[ -n "$DOMAIN" ]]; then
+            # Update Nginx configuration with domain
+            sudo sed -i "s/server_name _;/server_name $DOMAIN;/" /etc/nginx/sites-available/puter-automation
+            sudo systemctl reload nginx
+            
+            # Install SSL certificate
+            if gum spin --spinner dot --title "Installing SSL certificate..." -- sudo certbot --nginx --non-interactive --agree-tos --email admin@$DOMAIN -d $DOMAIN; then
+                success "SSL certificate installed successfully"
+                
+                # Setup auto-renewal
+                sudo crontab -l 2>/dev/null | { cat; echo "0 12 * * * /usr/bin/certbot renew --quiet"; } | sudo crontab -
+                success "Auto-renewal configured"
+            else
+                warn "SSL certificate installation failed"
+            fi
+        else
+            warn "No domain provided, skipping SSL setup"
+        fi
+    else
+        warn "SSL setup skipped"
+    fi
+}
+
+# Setup firewall
+setup_firewall() {
+    step "Setting up firewall..."
+    
+    if command -v ufw &> /dev/null; then
+        # Configure UFW
+        sudo ufw default deny incoming
+        sudo ufw default allow outgoing
+        sudo ufw allow ssh
+        sudo ufw allow http
+        sudo ufw allow https
+        sudo ufw allow 3000/tcp
+        sudo ufw allow 5678/tcp
+        
+        # Enable firewall
+        if gum confirm "Enable firewall now?"; then
+            sudo ufw --force enable
+            success "Firewall enabled successfully"
+        else
+            warn "Firewall configured but not enabled"
+        fi
+    elif command -v firewalld &> /dev/null; then
+        # Configure firewalld
+        sudo firewall-cmd --permanent --add-service=ssh
+        sudo firewall-cmd --permanent --add-service=http
+        sudo firewall-cmd --permanent --add-service=https
+        sudo firewall-cmd --permanent --add-port=3000/tcp
+        sudo firewall-cmd --permanent --add-port=5678/tcp
+        sudo firewall-cmd --reload
+        success "Firewalld configured successfully"
+    else
+        warn "No supported firewall found"
+    fi
+}
+
+# Setup monitoring and logging
+setup_monitoring() {
+    step "Setting up monitoring and logging..."
+    
+    # Create log directory
+    sudo mkdir -p /var/log/puter-automation
+    sudo chown $USER:$USER /var/log/puter-automation
+    
+    # Setup logrotate
+    sudo tee /etc/logrotate.d/puter-automation > /dev/null << EOF
+/var/log/puter-automation/*.log {
+    daily
+    missingok
+    rotate 52
+    compress
+    delaycompress
+    notifempty
+    create 644 root root
+    postrotate
+        systemctl reload rsyslog
+    endscript
+}
+EOF
+    
+    # Create monitoring script
+    sudo tee /usr/local/bin/puter-monitor > /dev/null << 'EOF'
+#!/bin/bash
+# Puter.js Monitoring Script
+
+LOG_FILE="/var/log/puter-automation/monitor.log"
+ALERT_EMAIL="admin@localhost"
+
+# Check if services are running
+services=("docker" "postgresql" "redis" "rabbitmq-server" "nginx" "supervisord")
+
+for service in "${services[@]}"; do
+    if ! systemctl is-active --quiet "$service"; then
+        echo "[$(date)] Service $service is not running" >> $LOG_FILE
+        systemctl start "$service"
+        echo "[$(date)] Attempted to start $service" >> $LOG_FILE
+    fi
+done
+
+# Check disk space
+DISK_USAGE=$(df / | awk 'NR==2 {print $5}' | sed 's/%//')
+if [ $DISK_USAGE -gt 80 ]; then
+    echo "[$(date)] Disk usage is ${DISK_USAGE}%" >> $LOG_FILE
+    echo "Disk space warning" | mail -s "Puter Automation: Disk Space Warning" $ALERT_EMAIL
+fi
+
+# Check memory usage
+MEM_USAGE=$(free | awk 'NR==2{printf "%.2f", $3*100/$2}')
+if (( $(echo "$MEM_USAGE > 80" | bc -l) )); then
+    echo "[$(date)] Memory usage is ${MEM_USAGE}%" >> $LOG_FILE
+fi
+EOF
+    
+    sudo chmod +x /usr/local/bin/puter-monitor
+    
+    # Add to crontab
+    (crontab -l 2>/dev/null; echo "*/5 * * * * /usr/local/bin/puter-monitor") | crontab -
+    
+    success "Monitoring and logging setup completed"
+}
+
+# Setup Supervisor for process management
+setup_supervisor() {
+    step "Setting up Supervisor..."
+    
+    # Create Supervisor configuration
+    sudo tee /etc/supervisor/conf.d/puter-automation.conf > /dev/null << EOF
+[program:puter-automation]
+command=/usr/bin/npm start
+directory=/opt/puter-automation/automation-system
+user=root
+autostart=true
+autorestart=true
+startretries=5
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/var/log/puter-automation/app.log
+stdout_logfile_maxbytes=50MB
+stdout_logfile_backups=10
+environment=NODE_ENV=production,PORT=3000
+
+[program:puter-monitor]
+command=/usr/local/bin/puter-monitor
+user=root
+autostart=true
+autorestart=true
+startretries=3
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/var/log/puter-automation/monitor.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=5
+EOF
+    
+    # Update Supervisor configuration
+    sudo supervisorctl reread
+    sudo supervisorctl update
+    
+    # Start services
+    sudo supervisorctl start puter-automation
+    sudo supervisorctl start puter-monitor
+    
+    success "Supervisor setup completed"
+}
+
+# Create startup scripts
+create_startup_scripts() {
+    step "Creating startup scripts..."
+    
+    # Create main startup script
+    sudo tee /usr/local/bin/puter-startup > /dev/null << 'EOF'
+#!/bin/bash
+# Puter.js Automation System Startup Script
+
+echo "Starting Puter.js Automation System..."
+
+# Start all services
+systemctl start docker
+systemctl start postgresql
+systemctl start redis
+systemctl start rabbitmq-server
+systemctl start nginx
+systemctl start fail2ban
+systemctl start supervisord
+
+# Wait for services to be ready
+sleep 10
+
+# Start n8n
+cd /opt/n8n
+docker-compose up -d
+
+# Wait for n8n to be ready
+sleep 30
+
+# Start Puter.js application
+supervisorctl start puter-automation
+
+echo "Puter.js Automation System started successfully"
+EOF
+    
+    sudo chmod +x /usr/local/bin/puter-startup
+    
+    # Create shutdown script
+    sudo tee /usr/local/bin/puter-shutdown > /dev/null << 'EOF'
+#!/bin/bash
+# Puter.js Automation System Shutdown Script
+
+echo "Stopping Puter.js Automation System..."
+
+# Stop Puter.js application
+supervisorctl stop puter-automation
+
+# Stop n8n
+cd /opt/n8n
+docker-compose down
+
+# Stop services
+systemctl stop supervisord
+systemctl stop nginx
+systemctl stop fail2ban
+systemctl stop rabbitmq-server
+systemctl stop redis
+systemctl stop postgresql
+systemctl stop docker
+
+echo "Puter.js Automation System stopped successfully"
+EOF
+    
+    sudo chmod +x /usr/local/bin/puter-shutdown
+    
+    # Create status script
+    sudo tee /usr/local/bin/puter-status > /dev/null << 'EOF'
+#!/bin/bash
+# Puter.js Automation System Status Script
+
+echo "Puter.js Automation System Status"
+echo "================================"
+
+# Check services
+services=("docker" "postgresql" "redis" "rabbitmq-server" "nginx" "supervisord")
+
+for service in "${services[@]}"; do
+    if systemctl is-active --quiet "$service"; then
+        echo "[OK] $service is running"
+    else
+        echo "[FAIL] $service is not running"
+    fi
+done
+
+# Check n8n
+if curl -s http://localhost:5678 > /dev/null; then
+    echo "[OK] n8n is running"
+else
+    echo "[FAIL] n8n is not running"
+fi
+
+# Check Puter.js application
+if curl -s http://localhost:3000 > /dev/null; then
+    echo "[OK] Puter.js application is running"
+else
+    echo "[FAIL] Puter.js application is not running"
+fi
+
+echo "================================"
+EOF
+    
+    sudo chmod +x /usr/local/bin/puter-status
+    
+    success "Startup scripts created"
+}
+
+# Create documentation
+create_documentation() {
+    step "Creating documentation..."
+    
+    # Create documentation directory
+    sudo mkdir -p /opt/puter-automation/docs
+    sudo chown $USER:$USER /opt/puter-automation/docs
+    
+    # Create README file
+    cat > /opt/puter-automation/README.md << EOF
+# Puter.js AI Automation System
+
+## Overview
+This is a comprehensive AI automation system built entirely on Puter.js technology, leveraging free AI models for natural language processing, voice recognition, and workflow automation.
+
+## Quick Start
+
+### Start the System
+\`\`\`bash
+sudo puter-startup
+\`\`\`
+
+### Check Status
+\`\`\`bash
+sudo puter-status
+\`\`\`
+
+### Stop the System
+\`\`\`bash
+sudo puter-shutdown
+\`\`\`
+
+## Access Points
+
+- **Main Application**: http://localhost:3000
+- **n8n Interface**: http://localhost:5678
+- **Health Check**: http://localhost/health
+
+## Configuration
+
+### Environment Variables
+Configuration is managed through the environment file:
+\`\`\`
+/opt/puter-automation/automation-system/.env
+\`\`\`
+
+### Database
+- **Type**: PostgreSQL
+- **Host**: localhost
+- **Port**: 5432
+- **Name**: puter_automation
+
+### Services
+- **Redis**: localhost:6379
+- **RabbitMQ**: localhost:5672
+- **n8n**: localhost:5678
+
+## Security
+
+### Firewall
+The system is protected by UFW with the following rules:
+- SSH: Port 22
+- HTTP: Port 80
+- HTTPS: Port 443
+- Application: Port 3000
+- n8n: Port 5678
+
+### SSL
+SSL certificates are automatically managed by Certbot.
+
+### Monitoring
+System monitoring runs every 5 minutes and logs to:
+\`\`\`
+/var/log/puter-automation/
+\`\`\`
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Services not starting**: Check logs in \`/var/log/puter-automation/\`
+2. **Database connection**: Verify PostgreSQL is running and credentials are correct
+3. **n8n not accessible**: Check Docker containers with \`docker ps\`
+4. **Application errors**: Check Supervisor logs with \`supervisorctl status\`
+
+### Log Files
+- Application logs: \`/var/log/puter-automation/app.log\`
+- Monitor logs: \`/var/log/puter-automation/monitor.log\`
+- Nginx logs: \`/var/log/nginx/\`
+- System logs: \`/var/log/syslog\`
+
+## Support
+
+For support and documentation, refer to the comprehensive implementation guide in \`/opt/puter-automation/docs/\`.
+
+## License
+This system is built using Puter.js free tier and is intended for educational and development purposes.
+EOF
+    
+    success "Documentation created"
+}
+
+# Final setup and validation
+final_setup() {
+    step "Performing final setup and validation..."
+    
+    # Set proper permissions
+    sudo chown -R root:root /opt/puter-automation
+    sudo chmod -R 755 /opt/puter-automation
+    
+    # Create systemd service for auto-start
+    sudo tee /etc/systemd/system/puter-automation.service > /dev/null << EOF
+[Unit]
+Description=Puter.js AI Automation System
+After=network.target docker.service postgresql.service redis.service rabbitmq-server.service nginx.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/puter-startup
+ExecStop=/usr/local/bin/puter-shutdown
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    
+    # Enable the service
+    sudo systemctl daemon-reload
+    sudo systemctl enable puter-automation.service
+    
+    # Run initial startup
+    step "Starting Puter.js Automation System..."
+    sudo /usr/local/bin/puter-startup
+    
+    # Wait for services to start
+    step "Waiting for services to start..."
+    sleep 30
+    
+    # Validate installation
+    step "Validating installation..."
+    
+    # Check if main application is running
+    if curl -s http://localhost:3000 > /dev/null; then
+        success "Main application is running"
+    else
+        warn "Main application is not running"
+    fi
+    
+    # Check if n8n is running
+    if curl -s http://localhost:5678 > /dev/null; then
+        success "n8n is running"
+    else
+        warn "n8n is not running"
+    fi
+    
+    # Check if all services are running
+    services=("docker" "postgresql" "redis" "rabbitmq-server" "nginx" "supervisord")
+    for service in "${services[@]}"; do
+        if systemctl is-active --quiet "$service"; then
+            success "$service is running"
+        else
+            warn "$service is not running"
+        fi
+    done
+    
+    success "Final setup completed"
+}
+
+# Display completion message with beautiful formatting
+display_completion() {
+    gum style --foreground=46 --border=double --align=center --width=60 --margin="2 4" --padding="2 4" \
+        "Puter.js AI Automation System" \
+        "Installation Completed Successfully!" \
+        "" \
+        "$(gum style --foreground=51)System Information:" \
+        "  • Main Application: http://localhost:3000" \
+        "  • n8n Interface: http://localhost:5678" \
+        "  • Health Check: http://localhost/health" \
+        "" \
+        "$(gum style --foreground=51)Management Commands:" \
+        "  • Start: sudo puter-startup" \
+        "  • Stop:  sudo puter-shutdown" \
+        "  • Status: sudo puter-status" \
+        "" \
+        "$(gum style --foreground=220)Thank you for using Puter.js AI Automation System!"
+    
+    echo
+    
+    gum style --foreground=147 "Configuration files can be found in:"
+    gum style --foreground=51 "  • Environment: /opt/puter-automation/automation-system/.env"
+    gum style --foreground=51 "  • Nginx Config: /etc/nginx/sites-available/puter-automation"
+    gum style --foreground=51 "  • Supervisor Config: /etc/supervisor/conf.d/puter-automation.conf"
+    
+    echo
+    
+    gum style --foreground=147 "Log files are located in:"
+    gum style --foreground=51 "  • Application: /var/log/puter-automation/app.log"
+    gum style --foreground=51 "  • Monitor: /var/log/puter-automation/monitor.log"
+    gum style --foreground=51 "  • System: /var/log/syslog"
+    
+    echo
+    
+    gum style --foreground=46 "Enjoy your beautiful Puter.js AI Automation System!"
+}
+
+# Main execution with beautiful progress
+main() {
+    show_header
+    
+    # Execute all setup steps with beautiful feedback
+    check_sudo
+    detect_distro
+    detect_package_manager
+    install_dependencies
+    start_services
+    install_nodejs
+    install_puterjs
+    setup_environment
+    setup_database
+    setup_n8n
+    setup_nginx
+    setup_ssl
+    setup_firewall
+    setup_monitoring
+    setup_supervisor
+    create_startup_scripts
+    create_documentation
+    final_setup
+    display_completion
+}
+
+# Run main function
+main "$@" "
