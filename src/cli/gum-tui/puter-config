@@ -1,0 +1,633 @@
+#!/usr/bin/env bash
+# Jobsprint Configuration Manager
+# Edit and manage Jobsprint service configurations
+
+set -euo pipefail
+
+# Source configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/config.sh"
+
+# Script metadata
+readonly SCRIPT_NAME="puter-config"
+readonly SCRIPT_VERSION="1.0.0"
+
+# Configuration files
+declare -A CONFIG_FILES=(
+    [n8n]="${CONFIG_DIR}/n8n/config.yml"
+    [postgres]="${CONFIG_DIR}/postgres/postgresql.conf"
+    [redis]="${CONFIG_DIR}/redis/redis.conf"
+    [rabbitmq]="${CONFIG_DIR}/rabbitmq/rabbitmq.conf"
+    [nginx]="${CONFIG_DIR}/nginx/nginx.conf"
+    [docker-compose]="${JOBSPRINT_ROOT}/docker-compose.yml"
+    [environment]="${JOBSPRINT_ROOT}/.env"
+)
+
+# Default configurations
+declare -A DEFAULT_CONFIGS
+
+# Display help
+show_config_help() {
+    show_help "${SCRIPT_NAME}" "Manage Jobsprint configurations" \
+        "Edit and manage configuration files for Jobsprint services." \
+        "" \
+        "Features:" \
+        "  • View current configurations" \
+        "  • Edit configuration files" \
+        "  • Reset to defaults" \
+        "  • Validate configurations" \
+        "  • Export/import configurations" \
+        "" \
+        "Supported services:" \
+        "  n8n, postgres, redis, rabbitmq, nginx, docker-compose, environment"
+}
+
+# List all configurations
+list_configs() {
+    show_header "Configuration Files" "Jobsprint Settings"
+    echo ""
+
+    for service in "${!CONFIG_FILES[@]}"; do
+        local config_file="${CONFIG_FILES[${service}]}"
+        local exists="No"
+        local status_color="${COLOR_ERROR}"
+
+        if [ -f "${config_file}" ]; then
+            exists="Yes"
+            status_color="${COLOR_SUCCESS}"
+        fi
+
+        gum join \
+            --vertical \
+            "$(gum style --foreground="${COLOR_PRIMARY}" --width 20 "${service}")" \
+            "$(gum style --foreground="${status_color}" --width 10 "${exists}")" \
+            "$(gum style --foreground="${COLOR_MUTED}" --width 50 "${config_file}")"
+    done
+
+    echo ""
+}
+
+# View a configuration file
+view_config() {
+    local service="$1"
+    local config_file="${CONFIG_FILES[${service}]}"
+
+    if [ ! -f "${config_file}" ]; then
+        log_error "Configuration file not found: ${config_file}"
+        return 1
+    fi
+
+    show_header "${service} Configuration" "${config_file}"
+    echo ""
+
+    # Syntax highlighting based on file type
+    case "${config_file}" in
+        *.yml|*.yaml)
+            gum format --type="code" --language="yaml" "$(cat "${config_file}")"
+            ;;
+        *.conf|*.cfg)
+            gum format --type="code" --language="bash" "$(cat "${config_file}")"
+            ;;
+        *.env)
+            gum format --type="code" --language="bash" "$(cat "${config_file}")"
+            ;;
+        *)
+            cat "${config_file}"
+            ;;
+    esac
+}
+
+# Edit a configuration file
+edit_config() {
+    local service="$1"
+    local config_file="${CONFIG_FILES[${service}]}"
+
+    # Create config directory if it doesn't exist
+    local config_dir
+    config_dir=$(dirname "${config_file}")
+    if [ ! -d "${config_dir}" ]; then
+        log_info "Creating configuration directory: ${config_dir}"
+        mkdir -p "${config_dir}"
+    fi
+
+    # Create file if it doesn't exist
+    if [ ! -f "${config_file}" ]; then
+        log_warning "Configuration file does not exist. Creating new file."
+        create_default_config "${service}" "${config_file}"
+    fi
+
+    # Backup current config
+    if [ -f "${config_file}" ]; then
+        local backup_file="${config_file}.backup.$(date +%Y%m%d-%H%M%S)"
+        cp "${config_file}" "${backup_file}"
+        log_info "Backup created: ${backup_file}"
+    fi
+
+    # Edit file
+    local editor="${EDITOR:-vi}"
+    if [ -n "${VISUAL:-}" ]; then
+        editor="${VISUAL}"
+    fi
+
+    # Try to find a suitable editor
+    if ! command -v "${editor}" >/dev/null 2>&1; then
+        for potential_editor in nano vim vi code; do
+            if command -v "${potential_editor}" >/dev/null 2>&1; then
+                editor="${potential_editor}"
+                break
+            fi
+        done
+    fi
+
+    log_info "Editing ${service} configuration with ${editor}..."
+    "${editor}" "${config_file}"
+
+    # Validate configuration
+    if validate_config "${service}" "${config_file}"; then
+        log_success "Configuration is valid"
+        return 0
+    else
+        log_warning "Configuration validation failed. You can restore from backup: ${backup_file}"
+        return 1
+    fi
+}
+
+# Create default configuration
+create_default_config() {
+    local service="$1"
+    local config_file="$2"
+
+    log_info "Creating default configuration for ${service}..."
+
+    case "${service}" in
+        n8n)
+            cat > "${config_file}" <<'EOF'
+# Jobsprint n8n Configuration
+
+# Webhook settings
+webhook_url: http://localhost:5678/webhook
+
+# Editor settings
+editor:
+  timezone: UTC
+  saveWorkflowExecutions: true
+  executionTimeout: 300
+  saveDataOnError: all
+  saveDataOnSuccess: all
+  saveManualExecutions: true
+
+# Database
+database:
+  type: postgresdb
+  host: postgres
+  port: 5432
+  database: n8n
+  user: n8n
+  password: n8n_password
+
+# Security
+security:
+  jwtAuthHeader: authorization
+  jwtHeaderPrefix: Bearer
+
+# External hooks
+external_hooks:
+  urls: []
+EOF
+            ;;
+
+        postgres)
+            cat > "${config_file}" <<'EOF'
+# Jobsprint PostgreSQL Configuration
+
+# Connection settings
+listen_addresses = '*'
+port = 5432
+max_connections = 100
+
+# Memory settings
+shared_buffers = 256MB
+effective_cache_size = 1GB
+maintenance_work_mem = 64MB
+work_mem = 16MB
+
+# WAL settings
+wal_level = replica
+max_wal_size = 1GB
+min_wal_size = 80MB
+
+# Logging
+log_destination = 'stderr'
+logging_collector = on
+log_directory = '/var/log/postgresql'
+log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'
+log_min_duration_statement = 1000
+EOF
+            ;;
+
+        redis)
+            cat > "${config_file}" <<'EOF'
+# Jobsprint Redis Configuration
+
+# Network
+bind 0.0.0.0
+port 6379
+protected-mode yes
+
+# Persistence
+save 900 1
+save 300 10
+save 60 10000
+
+# Memory
+maxmemory 256mb
+maxmemory-policy allkeys-lru
+
+# Logging
+loglevel notice
+logfile ""
+
+# Security
+requirepass redis_password
+EOF
+            ;;
+
+        rabbitmq)
+            cat > "${config_file}" <<'EOF'
+# Jobsprint RabbitMQ Configuration
+
+# Listeners
+listeners.tcp.default = 5672
+
+# Management
+management.tcp.port = 15672
+
+# Memory
+vm_memory_high_watermark.relative = 0.6
+
+# Disk
+disk_free_limit.relative = 2.0
+
+# Logging
+log.console = true
+log.console.level = info
+EOF
+            ;;
+
+        nginx)
+            cat > "${config_file}" <<'EOF'
+# Jobsprint Nginx Configuration
+
+worker_processes auto;
+error_log /var/log/nginx/error.log warn;
+pid /var/run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log /var/log/nginx/access.log main;
+
+    sendfile on;
+    tcp_nopush on;
+    keepalive_timeout 65;
+    gzip on;
+
+    # Upstream services
+    upstream n8n {
+        server n8n:5678;
+    }
+
+    # Main server
+    server {
+        listen 80;
+        server_name localhost;
+
+        location / {
+            proxy_pass http://n8n;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_cache_bypass $http_upgrade;
+        }
+    }
+}
+EOF
+            ;;
+
+        environment)
+            cat > "${config_file}" <<'EOF'
+# Jobsprint Environment Variables
+
+# Database
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=jobsprint
+POSTGRES_USER=jobsprint
+POSTGRES_PASSWORD=changeme
+
+# Redis
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_PASSWORD=changeme
+
+# RabbitMQ
+RABBITMQ_HOST=rabbitmq
+RABBITMQ_PORT=5672
+RABBITMQ_USER=guest
+RABBITMQ_PASSWORD=guest
+
+# n8n
+N8N_HOST=localhost
+N8N_PORT=5678
+N8N_PROTOCOL=http
+N8N_PATH=/
+N8N_BASIC_AUTH_ACTIVE=true
+N8N_BASIC_AUTH_USER=admin
+N8N_BASIC_AUTH_PASSWORD=changeme
+
+# Jobsprint
+JOBSPRINT_ENV=development
+JOBSPRINT_LOG_LEVEL=info
+JOBSPRINT_DEBUG=false
+EOF
+            ;;
+    esac
+
+    log_success "Default configuration created"
+}
+
+# Validate configuration
+validate_config() {
+    local service="$1"
+    local config_file="$2"
+
+    log_info "Validating ${service} configuration..."
+
+    case "${service}" in
+        n8n)
+            if ! grep -q "webhook_url" "${config_file}" 2>/dev/null; then
+                log_error "Missing webhook_url in configuration"
+                return 1
+            fi
+            ;;
+        postgres)
+            if ! grep -q "listen_addresses" "${config_file}" 2>/dev/null; then
+                log_error "Missing listen_addresses in configuration"
+                return 1
+            fi
+            ;;
+        redis)
+            if ! grep -q "port" "${config_file}" 2>/dev/null; then
+                log_error "Missing port in configuration"
+                return 1
+            fi
+            ;;
+        docker-compose)
+            if ! grep -q "version:" "${config_file}" 2>/dev/null; then
+                log_error "Invalid docker-compose format"
+                return 1
+            fi
+            ;;
+    esac
+
+    log_success "Configuration validation passed"
+    return 0
+}
+
+# Reset configuration to defaults
+reset_config() {
+    local service="$1"
+    local config_file="${CONFIG_FILES[${service}]}"
+
+    if ! confirm_action "Reset ${service} configuration to defaults? This cannot be undone."; then
+        log_info "Reset cancelled"
+        return 0
+    fi
+
+    # Create backup
+    if [ -f "${config_file}" ]; then
+        local backup_file="${config_file}.backup.$(date +%Y%m%d-%H%M%S)"
+        cp "${config_file}" "${backup_file}"
+        log_info "Backup created: ${backup_file}"
+    fi
+
+    # Create new default config
+    create_default_config "${service}" "${config_file}"
+
+    log_success "Configuration reset to defaults"
+}
+
+# Export configurations
+export_configs() {
+    local output_dir="${1:-jobsprint-config-export-$(date +%Y%m%d-%H%M%S)}"
+
+    log_info "Exporting configurations to ${output_dir}..."
+
+    mkdir -p "${output_dir}"
+
+    for service in "${!CONFIG_FILES[@]}"; do
+        local config_file="${CONFIG_FILES[${service}]}"
+        if [ -f "${config_file}" ]; then
+            cp "${config_file}" "${output_dir}/${service}.conf"
+            log_success "Exported ${service} configuration"
+        fi
+    done
+
+    # Create metadata
+    cat > "${output_dir}/export-info.txt" <<EOF
+Jobsprint Configuration Export
+Generated: $(date)
+Host: $(hostname)
+
+Services exported: ${#CONFIG_FILES[@]}
+
+To import these configurations, use:
+  puter-config --import ${output_dir}
+EOF
+
+    log_success "Configurations exported to ${output_dir}"
+}
+
+# Import configurations
+import_configs() {
+    local import_dir="$1"
+
+    if [ ! -d "${import_dir}" ]; then
+        log_error "Import directory not found: ${import_dir}"
+        return 1
+    fi
+
+    log_info "Importing configurations from ${import_dir}..."
+
+    for config_file in "${import_dir}"/*.conf; do
+        if [ -f "${config_file}" ]; then
+            local service
+            service=$(basename "${config_file}" .conf)
+            local target_file="${CONFIG_FILES[${service}]}"
+
+            if [ -n "${target_file}" ]; then
+                # Backup existing
+                if [ -f "${target_file}" ]; then
+                    local backup_file="${target_file}.backup.$(date +%Y%m%d-%H%M%S)"
+                    cp "${target_file}" "${backup_file}"
+                fi
+
+                # Copy imported config
+                mkdir -p "$(dirname "${target_file}")"
+                cp "${config_file}" "${target_file}"
+                log_success "Imported ${service} configuration"
+            fi
+        fi
+    done
+
+    log_success "Configurations imported successfully"
+}
+
+# Interactive configuration menu
+interactive_config() {
+    while true; do
+        local action
+        action=$(gum choose \
+            --header "Jobsprint Configuration Manager" \
+            "List configurations" \
+            "View configuration" \
+            "Edit configuration" \
+            "Reset configuration" \
+            "Validate configuration" \
+            "Export configurations" \
+            "Import configurations" \
+            "Exit")
+
+        case "${action}" in
+            "List configurations")
+                list_configs
+                ;;
+            "View configuration")
+                local service
+                service=$(gum choose --header "Select service:" "${!CONFIG_FILES[@]}")
+                [ -n "${service}" ] && view_config "${service}"
+                ;;
+            "Edit configuration")
+                local service
+                service=$(gum choose --header "Select service to edit:" "${!CONFIG_FILES[@]}")
+                [ -n "${service}" ] && edit_config "${service}"
+                ;;
+            "Reset configuration")
+                local service
+                service=$(gum choose --header "Select service to reset:" "${!CONFIG_FILES[@]}")
+                [ -n "${service}" ] && reset_config "${service}"
+                ;;
+            "Validate configuration")
+                local service
+                service=$(gum choose --header "Select service to validate:" "${!CONFIG_FILES[@]}")
+                [ -n "${service}" ] && validate_config "${service}" "${CONFIG_FILES[${service}]}"
+                ;;
+            "Export configurations")
+                export_configs
+                ;;
+            "Import configurations")
+                local import_dir
+                import_dir=$(gum input --placeholder "Path to import directory")
+                [ -n "${import_dir}" ] && import_configs "${import_dir}"
+                ;;
+            "Exit")
+                break
+                ;;
+        esac
+
+        echo ""
+        read -r -p "Press Enter to continue..."
+    done
+}
+
+# Main execution
+main() {
+    local list_only=false
+    local view_service=""
+    local edit_service=""
+    local reset_service=""
+    local validate_service=""
+    local export_dir=""
+    local import_dir=""
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_config_help
+                exit 0
+                ;;
+            -v|--verbose)
+                set -x
+                shift
+                ;;
+            -q|--quiet)
+                QUIET=true
+                shift
+                ;;
+            --list)
+                list_only=true
+                shift
+                ;;
+            --view)
+                view_service="$2"
+                shift 2
+                ;;
+            --edit)
+                edit_service="$2"
+                shift 2
+                ;;
+            --reset)
+                reset_service="$2"
+                shift 2
+                ;;
+            --validate)
+                validate_service="$2"
+                shift 2
+                ;;
+            --export)
+                export_dir="$2"
+                shift 2
+                ;;
+            --import)
+                import_dir="$2"
+                shift 2
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+
+    # Execute based on mode
+    if [ "${list_only}" = "true" ]; then
+        list_configs
+    elif [ -n "${view_service}" ]; then
+        view_config "${view_service}"
+    elif [ -n "${edit_service}" ]; then
+        edit_config "${edit_service}"
+    elif [ -n "${reset_service}" ]; then
+        reset_config "${reset_service}"
+    elif [ -n "${validate_service}" ]; then
+        validate_config "${validate_service}" "${CONFIG_FILES[${validate_service}]}"
+    elif [ -n "${export_dir}" ]; then
+        export_configs "${export_dir}"
+    elif [ -n "${import_dir}" ]; then
+        import_configs "${import_dir}"
+    else
+        interactive_config
+    fi
+}
+
+# Run main
+main "$@"

@@ -1,0 +1,535 @@
+#!/usr/bin/env bash
+# Jobsprint Real-Time Health Monitor
+# Live dashboard for monitoring Jobsprint services
+
+set -euo pipefail
+
+# Source configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/config.sh"
+
+# Script metadata
+readonly SCRIPT_NAME="puter-monitor"
+readonly SCRIPT_VERSION="1.0.0"
+
+# Refresh intervals (seconds)
+readonly REFRESH_INTERVAL=2
+readonly SLOW_REFRESH=5
+
+# Display dimensions
+readonly TERMINAL_WIDTH=80
+readonly TERMINAL_HEIGHT=24
+
+# Display help
+show_monitor_help() {
+    show_help "${SCRIPT_NAME}" "Real-time health monitoring dashboard" \
+        "Display a live dashboard of Jobsprint service health and metrics." \
+        "" \
+        "Features:" \
+        "  • Real-time service status" \
+        "  • CPU and memory usage" \
+        "  • Network connection status" \
+        "  • Recent log entries" \
+        "  • System resource overview" \
+        "" \
+        "Press 'q' to quit, 'r' to refresh, 's' to switch view mode"
+}
+
+# Get system resource usage
+get_system_resources() {
+    local cpu_usage
+    local memory_usage
+    local disk_usage
+    local load_avg
+
+    # CPU usage
+    if command -v mpstat >/dev/null 2>&1; then
+        cpu_usage=$(mpstat 1 1 | awk '/Average/ {print 100-$NF"%"}')
+    else
+        cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2"%"}')
+    fi
+
+    # Memory usage
+    if command -v free >/dev/null 2>&1; then
+        memory_usage=$(free -h | awk 'NR==2{printf "%.1f%% (%s/%s)", $3*100/$2, $3, $2}')
+    fi
+
+    # Disk usage
+    disk_usage=$(df -h "${JOBSPRINT_ROOT}" 2>/dev/null | awk 'NR==2{printf "%s (%s used)", $5, $3}')
+
+    # Load average
+    load_avg=$(uptime | awk -F'load average:' '{print $2}')
+
+    echo "${cpu_usage}|${memory_usage}|${disk_usage}|${load_avg}"
+}
+
+# Get network status
+get_network_status() {
+    local connections=0
+    local listening=0
+
+    # Count connections for our services
+    for service in "${SERVICES[@]}"; do
+        case "${service}" in
+            n8n)
+                if netstat -an 2>/dev/null | grep -q ":${N8N_PORT}.*LISTEN"; then
+                    ((listening++))
+                fi
+                ;;
+            postgres)
+                if netstat -an 2>/dev/null | grep -q ":${POSTGRES_PORT}.*LISTEN"; then
+                    ((listening++))
+                fi
+                ;;
+            redis)
+                if netstat -an 2>/dev/null | grep -q ":${REDIS_PORT}.*LISTEN"; then
+                    ((listening++))
+                fi
+                ;;
+            rabbitmq)
+                if netstat -an 2>/dev/null | grep -q ":${RABBITMQ_PORT}.*LISTEN"; then
+                    ((listening++))
+                fi
+                ;;
+        esac
+    done
+
+    echo "${listening} listening"
+}
+
+# Get recent error count
+get_recent_errors() {
+    local count=0
+    local since="${1:-5}"
+
+    for service in "${SERVICES[@]}"; do
+        local log_file="${LOG_DIR}/${service}.log"
+        if [ -f "${log_file}" ]; then
+            local recent_errors
+            recent_errors=$(find "${log_file}" -mmin -"${since}" 2>/dev/null | xargs grep -ci "error" 2>/dev/null || echo "0")
+            count=$((count + recent_errors))
+        fi
+    done
+
+    echo "${count}"
+}
+
+# Display top header
+display_header_bar() {
+    local timestamp
+    local hostname
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    hostname=$(hostname)
+
+    gum style \
+        --foreground="${COLOR_PRIMARY}" \
+        --background="${COLOR_SECONDARY}" \
+        --bold \
+        --align center \
+        --width "${TERMINAL_WIDTH}" \
+        "Jobsprint Health Monitor - ${timestamp} | ${hostname}"
+}
+
+# Display system resources
+display_resources() {
+    IFS='|' read -r cpu memory disk load <<< "$(get_system_resources)"
+
+    gum style \
+        --foreground="${COLOR_PRIMARY}" \
+        --bold \
+        "System Resources" > /dev/tty
+
+    gum format --type="markdown" <<-EOF
+    CPU: **${cpu}** | Memory: **${memory}** | Disk: **${disk}**
+    Load Average: **${load}**
+EOF
+
+    echo "" > /dev/tty
+}
+
+# Display service grid
+display_service_grid() {
+    gum style \
+        --foreground="${COLOR_PRIMARY}" \
+        --bold \
+        "Services" > /dev/tty
+
+    for service in "${SERVICES[@]}"; do
+        IFS='|' read -r status uptime mem cpu <<< "$(get_service_status "${service}")"
+
+        local status_color
+        local status_icon
+
+        if [ "${status}" = "running" ]; then
+            status_color="${COLOR_SUCCESS}"
+            status_icon="●"
+        else
+            status_color="${COLOR_ERROR}"
+            status_icon="○"
+        fi
+
+        gum join \
+            --vertical \
+            "$(gum style --foreground="${status_color}" --width 12 "${status_icon} ${service}")" \
+            "$(gum style --foreground="${COLOR_MUTED}" --width 30 "${uptime}")" \
+            "$(gum style --foreground="${COLOR_MUTED}" --width 12 "${mem}")" \
+            "$(gum style --foreground="${COLOR_MUTED}" --width 10 "${cpu}")"
+    done
+
+    echo "" > /dev/tty
+}
+
+# Display network status
+display_network() {
+    local network_status
+    network_status=$(get_network_status)
+
+    gum style \
+        --foreground="${COLOR_PRIMARY}" \
+        --bold \
+        "Network" > /dev/tty
+
+    gum style \
+        --foreground="${COLOR_INFO}" \
+        "Listening Ports: ${network_status}"
+
+    echo "" > /dev/tty
+}
+
+# Display recent activity
+display_recent_activity() {
+    local errors
+    errors=$(get_recent_errors 5)
+
+    gum style \
+        --foreground="${COLOR_PRIMARY}" \
+        --bold \
+        "Recent Activity (5 min)" > /dev/tty
+
+    if [ "${errors}" -gt 0 ]; then
+        gum style \
+            --foreground="${COLOR_ERROR}" \
+            "Errors: ${errors}"
+    else
+        gum style \
+            --foreground="${COLOR_SUCCESS}" \
+            "No errors"
+    fi
+
+    # Show last few log entries
+    local job_log="${LOG_DIR}/jobsprint.log"
+    if [ -f "${job_log}" ]; then
+        echo ""
+        gum style --foreground="${COLOR_MUTED}" "Recent logs:"
+        tail -n 3 "${job_log}" 2>/dev/null | while read -r line; do
+            gum style --foreground="${COLOR_MUTED}" --margin "0 2" "  ${line}"
+        done
+    fi
+
+    echo "" > /dev/tty
+}
+
+# Display alerts
+display_alerts() {
+    local alerts=()
+
+    # Check for stopped services
+    for service in "${SERVICES[@]}"; do
+        status=$(check_service "${service}")
+        if [ "${status}" != "running" ]; then
+            alerts+=("⚠️  ${service} is not running")
+        fi
+    done
+
+    # Check for high errors
+    local errors
+    errors=$(get_recent_errors 5)
+    if [ "${errors}" -gt 10 ]; then
+        alerts+=("🚨 High error rate: ${errors} errors in last 5 minutes")
+    fi
+
+    # Check disk space
+    local disk_usage
+    disk_usage=$(df -h "${JOBSPRINT_ROOT}" 2>/dev/null | awk 'NR==2{print $5}' | sed 's/%//')
+    if [ "${disk_usage:-0}" -gt 80 ]; then
+        alerts+=("💾 Disk space critical: ${disk_usage}% used")
+    fi
+
+    if [ ${#alerts[@]} -gt 0 ]; then
+        gum style \
+            --foreground="${COLOR_WARNING}" \
+            --border double \
+            --border-foreground="${COLOR_WARNING}" \
+            --padding "0 1" \
+            "Alerts" > /dev/tty
+
+        for alert in "${alerts[@]}"; do
+            gum style --foreground="${COLOR_WARNING}" --margin "0 1" "${alert}"
+        done
+
+        echo "" > /dev/tty
+    fi
+}
+
+# Display help footer
+display_footer() {
+    gum style \
+        --foreground="${COLOR_MUTED}" \
+        --align center \
+        --width "${TERMINAL_WIDTH}" \
+        "[q] Quit | [r] Refresh | [s] Switch View | [h] Help"
+}
+
+# Main dashboard view
+dashboard_view() {
+    clear
+    display_header_bar
+    echo ""
+    display_resources
+    display_service_grid
+    display_network
+    display_recent_activity
+    display_alerts
+    display_footer
+}
+
+# Compact view (single line per service)
+compact_view() {
+    clear
+    display_header_bar
+    echo ""
+
+    for service in "${SERVICES[@]}"; do
+        IFS='|' read -r status uptime mem cpu <<< "$(get_service_status "${service}")"
+
+        local status_color
+        if [ "${status}" = "running" ]; then
+            status_color="${COLOR_SUCCESS}"
+        else
+            status_color="${COLOR_ERROR}"
+        fi
+
+        gum join \
+            --vertical \
+            "$(gum style --foreground="${status_color}" --width 10 "${service}")" \
+            "$(gum style --foreground="${COLOR_MUTED}" --width 50 "${uptime} | ${mem} | ${cpu}")"
+    done
+
+    echo ""
+    display_footer
+}
+
+# Detailed view (full stats for one service)
+detailed_view() {
+    local service="${1:-n8n}"
+
+    clear
+    display_header_bar
+    echo ""
+
+    gum style \
+        --foreground="${COLOR_PRIMARY}" \
+        --bold \
+        --border double \
+        --border-foreground="${COLOR_PRIMARY}" \
+        --align center \
+        --padding "1 2" \
+        "${service} Details"
+
+    echo ""
+
+    # Service status
+    IFS='|' read -r status uptime mem cpu <<< "$(get_service_status "${service}")"
+
+    gum format --type="markdown" <<-EOF
+    **Status**: ${status}
+    **Uptime**: ${uptime}
+    **Memory**: ${mem}
+    **CPU**: ${cpu}
+EOF
+
+    echo ""
+
+    # Recent logs for this service
+    local log_file="${LOG_DIR}/${service}.log"
+    if [ -f "${log_file}" ]; then
+        gum style --foreground="${COLOR_PRIMARY}" --bold "Recent Logs"
+        echo ""
+        tail -n 5 "${log_file}" 2>/dev/null | while read -r line; do
+            colorize_log "${line}"
+        done
+    fi
+
+    echo ""
+    display_footer
+}
+
+# Interactive monitor
+interactive_monitor() {
+    local view="dashboard"
+    local running=true
+
+    # Check terminal size
+    if ! command -v tput >/dev/null 2>&1; then
+        log_error "This monitor requires a terminal with tput support"
+        return 1
+    fi
+
+    # Hide cursor
+    tput civis 2>/dev/null || true
+
+    # Trap to restore cursor on exit
+    trap 'tput cnorm 2>/dev/null || true; running=false' EXIT INT TERM
+
+    log_info "Starting Jobsprint health monitor..."
+    log_info "Press 'q' to quit"
+    sleep 1
+
+    while [ "${running}" = "true" ]; do
+        case "${view}" in
+            dashboard)
+                dashboard_view
+                ;;
+            compact)
+                compact_view
+                ;;
+            detailed)
+                detailed_view "n8n"
+                ;;
+        esac
+
+        # Read single key with timeout
+        IFS= read -rsn1 -t "${REFRESH_INTERVAL}" key 2>/dev/null || key=""
+
+        case "${key}" in
+            q|Q)
+                running=false
+                ;;
+            r|R)
+                # Force refresh
+                continue
+                ;;
+            s|S)
+                # Switch view
+                view=$(gum choose \
+                    --header "Select view mode:" \
+                    "dashboard" \
+                    "compact" \
+                    "detailed")
+                ;;
+            h|H)
+                # Show help
+                clear
+                show_monitor_help
+                echo ""
+                read -r -p "Press Enter to continue..."
+                ;;
+            d|D)
+                view="detailed"
+                ;;
+            c|C)
+                view="compact"
+                ;;
+        esac
+    done
+
+    clear
+    log_info "Monitor stopped"
+}
+
+# Single shot dashboard (one-time display)
+snapshot_dashboard() {
+    dashboard_view
+    echo ""
+    log_info "Snapshot complete"
+}
+
+# Generate JSON metrics for monitoring systems
+export_metrics_json() {
+    local timestamp
+    timestamp=$(date -Iseconds)
+
+    echo "{"
+    echo "  \"timestamp\": \"${timestamp}\","
+    echo "  \"hostname\": \"$(hostname)\","
+    echo "  \"services\": {"
+
+    local first=true
+    for service in "${SERVICES[@]}"; do
+        if [ "${first}" = "true" ]; then
+            first=false
+        else
+            echo ","
+        fi
+
+        IFS='|' read -r status uptime mem cpu <<< "$(get_service_status "${service}")"
+
+        echo -n "    \"${service}\": {"
+        echo -n "\"status\": \"${status}\", "
+        echo -n "\"uptime\": \"${uptime}\", "
+        echo -n "\"memory\": \"${mem}\", "
+        echo -n "\"cpu\": \"${cpu}\""
+        echo -n "}"
+    done
+
+    echo ""
+    echo "  }"
+    echo "}"
+}
+
+# Main execution
+main() {
+    local snapshot=false
+    local export_json=false
+    local export_file=""
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_monitor_help
+                exit 0
+                ;;
+            -v|--verbose)
+                set -x
+                shift
+                ;;
+            -q|--quiet)
+                QUIET=true
+                shift
+                ;;
+            --snapshot|-1)
+                snapshot=true
+                shift
+                ;;
+            --export-json)
+                export_json=true
+                export_file="${2:-jobsprint-metrics-$(date +%Y%m%d-%H%M%S).json}"
+                shift 2
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+
+    # Check requirements
+    ensure_directories
+
+    if ! check_requirements gum; then
+        error_exit "Missing required dependency: gum"
+    fi
+
+    # Execute based on mode
+    if [ "${export_json}" = "true" ]; then
+        export_metrics_json > "${export_file}"
+        log_success "Metrics exported to ${export_file}"
+    elif [ "${snapshot}" = "true" ]; then
+        snapshot_dashboard
+    else
+        interactive_monitor
+    fi
+}
+
+# Run main
+main "$@"

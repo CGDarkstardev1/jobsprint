@@ -1,0 +1,230 @@
+#!/usr/bin/env bash
+# Jobsprint Service Shutdown Script
+# Stops all Jobsprint services gracefully in reverse dependency order
+
+set -euo pipefail
+
+# Source configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/config.sh"
+
+# Script metadata
+readonly SCRIPT_NAME="puter-shutdown"
+readonly SCRIPT_VERSION="1.0.0"
+
+# Shutdown order (reverse of startup order)
+readonly SHUTDOWN_ORDER=(
+    "nginx"
+    "n8n"
+    "rabbitmq"
+    "redis"
+    "postgres"
+)
+
+# Graceful shutdown timeout (seconds)
+readonly SHUTDOWN_TIMEOUT=30
+
+# Display help
+show_shutdown_help() {
+    show_help "${SCRIPT_NAME}" "Stop all Jobsprint services" \
+        "Stops all Jobsprint services gracefully in reverse dependency order." \
+        "" \
+        "Services are stopped in the following order:" \
+        "  1. nginx - Reverse proxy (stop first)" \
+        "  2. n8n - Workflow engine" \
+        "  3. rabbitmq - Message broker" \
+        "  4. redis - Cache and queue" \
+        "  5. postgres - Database (stop last)" \
+        "" \
+        "Each service is given time to shutdown gracefully before force-stopping."
+}
+
+# Stop a single service
+stop_service() {
+    local service="$1"
+    local dry_run="${DRY_RUN:-false}"
+
+    log_info "Stopping ${service}..."
+
+    if [ "${dry_run}" = "true" ]; then
+        log_warning "DRY RUN: Would stop ${service}"
+        return 0
+    fi
+
+    # Check if running
+    status=$(check_service "${service}")
+    if [ "${status}" = "stopped" ]; then
+        log_warning "${service} is not running"
+        return 0
+    fi
+
+    # Try different service management methods
+    if systemctl is-active "${service}" 2>/dev/null; then
+        spin "Stopping ${service} via systemd..." sudo systemctl stop "${service}"
+    elif docker ps --format '{{.Names}}' | grep -q "^${service}$" 2>/dev/null; then
+        spin "Stopping ${service} via Docker..." docker stop "${service}"
+    elif docker-compose -f "${JOBSPRINT_ROOT}/docker-compose.yml" ps -q "${service}" >/dev/null 2>&1; then
+        spin "Stopping ${service} via Docker Compose..." docker-compose -f "${JOBSPRINT_ROOT}/docker-compose.yml" stop "${service}"
+    elif pgrep -f "${service}" >/dev/null 2>&1; then
+        spin "Stopping ${service} via process..." pkill -TERM -f "${service}"
+    else
+        log_warning "No service manager found for ${service}"
+        return 1
+    fi
+
+    # Wait for graceful shutdown
+    local elapsed=0
+    while [ ${elapsed} -lt ${SHUTDOWN_TIMEOUT} ]; do
+        status=$(check_service "${service}")
+        if [ "${status}" = "stopped" ]; then
+            log_success "${service} stopped gracefully"
+            return 0
+        fi
+        sleep 1
+        ((elapsed++))
+    done
+
+    # Force kill if still running
+    log_warning "${service} did not stop gracefully, force killing..."
+    if pgrep -f "${service}" >/dev/null 2>&1; then
+        pkill -KILL -f "${service}"
+    fi
+
+    log_success "${service} stopped (forced)"
+    return 0
+}
+
+# Stop all services
+stop_all_services() {
+    local failed=()
+    local dry_run="${DRY_RUN:-false}"
+
+    show_header "Jobsprint Shutdown" "Stopping all services"
+
+    if [ "${dry_run}" = "true" ]; then
+        log_warning "DRY RUN MODE - No changes will be made"
+        echo ""
+    fi
+
+    log_info "Stopping services in reverse dependency order..."
+    echo ""
+
+    for service in "${SHUTDOWN_ORDER[@]}"; do
+        gum format --type="markdown" "### Stopping **${service}**" > /dev/tty
+
+        if stop_service "${service}"; then
+            gum style \
+                --foreground="${COLOR_SUCCESS}" \
+                "✓ ${service} stopped" > /dev/tty
+        else
+            failed+=("${service}")
+            gum style \
+                --foreground="${COLOR_ERROR}" \
+                "✗ ${service} failed to stop" > /dev/tty
+        fi
+
+        echo ""
+    done
+
+    # Summary
+    gum style \
+        --foreground="${COLOR_PRIMARY}" \
+        --border double \
+        --border-foreground="${COLOR_PRIMARY}" \
+        --align center \
+        --padding "1 2" \
+        "Shutdown Complete" > /dev/tty
+
+    if [ ${#failed[@]} -eq 0 ]; then
+        log_success "All services stopped successfully!"
+        return 0
+    else
+        log_error "Failed to stop services: ${failed[*]}"
+        return 1
+    fi
+}
+
+# Restart services (stop then start)
+restart_services() {
+    log_info "Restarting all services..."
+
+    stop_all_services
+
+    echo ""
+    gum style \
+        --foreground="${COLOR_INFO}" \
+        --align center \
+        "Waiting 3 seconds before restart..." > /dev/tty
+
+    sleep 3
+
+    echo ""
+    log_info "Starting services..."
+
+    # Source and run startup script
+    "${SCRIPT_DIR}/puter-startup" "$@"
+}
+
+# Main execution
+main() {
+    local restart=false
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_shutdown_help
+                exit 0
+                ;;
+            -v|--verbose)
+                set -x
+                shift
+                ;;
+            -q|--quiet)
+                QUIET=true
+                shift
+                ;;
+            --dry-run)
+                DRY_RUN=true
+                shift
+                ;;
+            --restart)
+                restart=true
+                shift
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+
+    # Check requirements
+    ensure_directories
+
+    if ! check_requirements gum docker; then
+        error_exit "Missing required dependencies. Please install gum and docker."
+    fi
+
+    # Confirm if not in quiet mode
+    if [ "${QUIET:-false}" != "true" ]; then
+        local prompt="Stop all Jobsprint services?"
+        if [ "${restart}" = "true" ]; then
+            prompt="Restart all Jobsprint services?"
+        fi
+
+        if ! confirm_action "${prompt}"; then
+            log_info "Operation cancelled"
+            exit 0
+        fi
+    fi
+
+    # Perform operation
+    if [ "${restart}" = "true" ]; then
+        restart_services "$@"
+    else
+        stop_all_services
+    fi
+}
+
+# Run main
+main "$@"

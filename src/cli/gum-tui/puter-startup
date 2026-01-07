@@ -1,0 +1,196 @@
+#!/usr/bin/env bash
+# Jobsprint Service Startup Script
+# Starts all Jobsprint services in the correct order with health checks
+
+set -euo pipefail
+
+# Source configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/config.sh"
+
+# Script metadata
+readonly SCRIPT_NAME="puter-startup"
+readonly SCRIPT_VERSION="1.0.0"
+
+# Startup order (services must start in this order)
+readonly STARTUP_ORDER=(
+    "postgres"
+    "redis"
+    "rabbitmq"
+    "n8n"
+    "nginx"
+)
+
+# Health check timeout (seconds)
+readonly HEALTH_CHECK_TIMEOUT=30
+
+# Display help
+show_startup_help() {
+    show_help "${SCRIPT_NAME}" "Start all Jobsprint services" \
+        "Starts all Jobsprint services in dependency order with health checks." \
+        "" \
+        "Services are started in the following order:" \
+        "  1. postgres - Database" \
+        "  2. redis - Cache and queue" \
+        "  3. rabbitmq - Message broker" \
+        "  4. n8n - Workflow engine" \
+        "  5. nginx - Reverse proxy" \
+        "" \
+        "Each service is health-checked before proceeding to the next."
+}
+
+# Health check for a service
+health_check() {
+    local service="$1"
+    local timeout="${2:-${HEALTH_CHECK_TIMEOUT}}"
+    local elapsed=0
+
+    log_info "Checking health of ${service}..."
+
+    while [ ${elapsed} -lt ${timeout} ]; do
+        status=$(check_service "${service}")
+
+        if [ "${status}" = "running" ]; then
+            log_success "${service} is healthy"
+            return 0
+        fi
+
+        sleep 1
+        ((elapsed++))
+
+        # Show progress
+        if [ $((elapsed % 5)) -eq 0 ]; then
+            log_debug "Waiting for ${service}... (${elapsed}s)"
+        fi
+    done
+
+    log_error "${service} failed health check after ${timeout}s"
+    return 1
+}
+
+# Start a single service
+start_service() {
+    local service="$1"
+    local dry_run="${DRY_RUN:-false}"
+
+    log_info "Starting ${service}..."
+
+    if [ "${dry_run}" = "true" ]; then
+        log_warning "DRY RUN: Would start ${service}"
+        return 0
+    fi
+
+    # Check if already running
+    status=$(check_service "${service}")
+    if [ "${status}" = "running" ]; then
+        log_warning "${service} is already running"
+        return 0
+    fi
+
+    # Try different service management methods
+    if systemctl is-enabled "${service}" 2>/dev/null; then
+        spin "Starting ${service} via systemd..." sudo systemctl start "${service}"
+    elif docker-compose -f "${JOBSPRINT_ROOT}/docker-compose.yml" ps -q "${service}" >/dev/null 2>&1; then
+        spin "Starting ${service} via Docker Compose..." docker-compose -f "${JOBSPRINT_ROOT}/docker-compose.yml" start "${service}"
+    elif docker inspect "${service}" >/dev/null 2>&1; then
+        spin "Starting ${service} via Docker..." docker start "${service}"
+    else
+        log_warning "No service manager found for ${service}"
+        return 1
+    fi
+
+    # Health check
+    if health_check "${service}"; then
+        log_success "${service} started successfully"
+        return 0
+    else
+        log_error "${service} failed to start properly"
+        return 1
+    fi
+}
+
+# Start all services
+start_all_services() {
+    local failed=()
+    local dry_run="${DRY_RUN:-false}"
+
+    show_header "Jobsprint Startup" "Starting all services"
+
+    if [ "${dry_run}" = "true" ]; then
+        log_warning "DRY RUN MODE - No changes will be made"
+        echo ""
+    fi
+
+    log_info "Starting services in dependency order..."
+    echo ""
+
+    for service in "${STARTUP_ORDER[@]}"; do
+        gum format --type="markdown" "### Starting **${service}**" > /dev/tty
+
+        if start_service "${service}"; then
+            # Get and display service details
+            IFS='|' read -r status uptime memory cpu <<< "$(get_service_status "${service}")"
+
+            gum style \
+                --foreground="${COLOR_SUCCESS}" \
+                "Status: ${status}" > /dev/tty
+
+            if [ "${uptime}" != "N/A" ]; then
+                gum style \
+                    --foreground="${COLOR_INFO}" \
+                    "  Uptime: ${uptime} | Memory: ${memory} | CPU: ${cpu}" > /dev/tty
+            fi
+        else
+            failed+=("${service}")
+        fi
+
+        echo ""
+    done
+
+    # Summary
+    gum style \
+        --foreground="${COLOR_PRIMARY}" \
+        --border double \
+        --border-foreground="${COLOR_PRIMARY}" \
+        --align center \
+        --padding "1 2" \
+        "Startup Complete" > /dev/tty
+
+    if [ ${#failed[@]} -eq 0 ]; then
+        log_success "All services started successfully!"
+        return 0
+    else
+        log_error "Failed to start services: ${failed[*]}"
+        return 1
+    fi
+}
+
+# Main execution
+main() {
+    # Parse arguments
+    if ! parse_args "$@"; then
+        show_startup_help
+        exit 0
+    fi
+
+    # Check requirements
+    ensure_directories
+
+    if ! check_requirements gum docker; then
+        error_exit "Missing required dependencies. Please install gum and docker."
+    fi
+
+    # Confirm if not in quiet mode
+    if [ "${QUIET:-false}" != "true" ]; then
+        if ! confirm_action "Start all Jobsprint services?"; then
+            log_info "Startup cancelled"
+            exit 0
+        fi
+    fi
+
+    # Start services
+    start_all_services
+}
+
+# Run main
+main "$@"

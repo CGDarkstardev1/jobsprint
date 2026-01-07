@@ -1,0 +1,400 @@
+#!/usr/bin/env bash
+# Jobsprint Log Viewer
+# View and filter logs from Jobsprint services
+
+set -euo pipefail
+
+# Source configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/config.sh"
+
+# Script metadata
+readonly SCRIPT_NAME="puter-logs"
+readonly SCRIPT_VERSION="1.0.0"
+
+# Default number of lines to show
+readonly DEFAULT_LINES=100
+
+# Log files for each service
+declare -A SERVICE_LOGS=(
+    [n8n]="${LOG_DIR}/n8n.log"
+    [postgres]="${LOG_DIR}/postgres.log"
+    [redis]="${LOG_DIR}/redis.log"
+    [rabbitmq]="${LOG_DIR}/rabbitmq.log"
+    [nginx]="${LOG_DIR}/nginx.log"
+    [jobsprint]="${LOG_DIR}/jobsprint.log"
+)
+
+# Display help
+show_logs_help() {
+    show_help "${SCRIPT_NAME}" "View and filter Jobsprint logs" \
+        "Display logs from Jobsprint services with filtering and search capabilities." \
+        "" \
+        "Supported services:" \
+        "  n8n, postgres, redis, rabbitmq, nginx, jobsprint (all services)" \
+        "" \
+        "Features:" \
+        "  • View logs from specific services or all services" \
+        "  • Filter by log level (INFO, WARN, ERROR, DEBUG)" \
+        "  • Search for specific patterns" \
+        "  • Tail logs in real-time" \
+        "  • Export logs to file"
+}
+
+# Colorize log line based on level
+colorize_log() {
+    local line="$1"
+
+    if echo "${line}" | grep -qi "error"; then
+        gum style --foreground="${COLOR_ERROR}" "${line}"
+    elif echo "${line}" | grep -qi "warn"; then
+        gum style --foreground="${COLOR_WARNING}" "${line}"
+    elif echo "${line}" | grep -qi "debug"; then
+        gum style --foreground="${COLOR_MUTED}" "${line}"
+    elif echo "${line}" | grep -qi "info"; then
+        gum style --foreground="${COLOR_INFO}" "${line}"
+    else
+        echo "${line}"
+    fi
+}
+
+# View logs from a service
+view_logs() {
+    local service="$1"
+    local lines="${2:-${DEFAULT_LINES}}"
+    local follow="${3:-false}"
+    local filter="${4:-}"
+    local search="${5:-}"
+
+    local log_file="${SERVICE_LOGS[${service}]}"
+
+    # Check if log file exists
+    if [ ! -f "${log_file}" ]; then
+        log_warning "Log file not found: ${log_file}"
+        log_info "Checking for system logs..."
+
+        # Try journalctl for systemd services
+        if command -v journalctl >/dev/null 2>&1; then
+            if journalctl -u "${service}" --no-pager -n 1 >/dev/null 2>&1; then
+                log_info "Reading from journalctl..."
+                read_journalctl_logs "${service}" "${lines}" "${follow}" "${filter}" "${search}"
+                return $?
+            fi
+        fi
+
+        log_error "No logs found for ${service}"
+        return 1
+    fi
+
+    # Build grep command for filtering
+    local grep_cmd="cat"
+    if [ -n "${filter}" ]; then
+        grep_cmd="grep -i --line-buffered '${filter}'"
+    fi
+
+    if [ -n "${search}" ]; then
+        if [ "${grep_cmd}" = "cat" ]; then
+            grep_cmd="grep -i --line-buffered '${search}'"
+        else
+            grep_cmd="${grep_cmd} | grep -i --line-buffered '${search}'"
+        fi
+    fi
+
+    # Display header
+    show_header "${service} Logs" "Last ${lines} lines"
+    echo ""
+
+    # View or tail logs
+    if [ "${follow}" = "true" ]; then
+        log_info "Tailing logs (Press Ctrl+C to exit)..."
+        echo ""
+
+        eval tail -n "${lines}" -f "${log_file}" | while read -r line; do
+            colorize_log "${line}"
+        done
+    else
+        eval tail -n "${lines}" "${log_file}" | ${grep_cmd} | while read -r line; do
+            colorize_log "${line}"
+        done
+    fi
+}
+
+# Read logs from journalctl
+read_journalctl_logs() {
+    local service="$1"
+    local lines="$2"
+    local follow="$3"
+    local filter="$4"
+    local search="$5"
+
+    local journal_cmd="journalctl -u ${service} --no-pager -n ${lines}"
+
+    if [ "${follow}" = "true" ]; then
+        journal_cmd="journalctl -u ${service} --no-pager -f"
+    fi
+
+    if [ -n "${filter}" ]; then
+        journal_cmd="${journal_cmd} | grep -i '${filter}'"
+    fi
+
+    if [ -n "${search}" ]; then
+        journal_cmd="${journal_cmd} | grep -i '${search}'"
+    fi
+
+    eval "${journal_cmd}" | while read -r line; do
+        colorize_log "${line}"
+    done
+}
+
+# View logs from all services
+view_all_logs() {
+    local lines="${1:-${DEFAULT_LINES}}"
+    local filter="${2:-}"
+    local search="${3:-}"
+
+    show_header "Jobsprint Logs" "All Services"
+    echo ""
+
+    for service in "${SERVICES[@]}"; do
+        gum format --type="markdown" "### **${service}**" > /dev/tty
+        echo ""
+
+        local log_file="${SERVICE_LOGS[${service}]}"
+        if [ -f "${log_file}" ]; then
+            tail -n "${lines}" "${log_file}" | while read -r line; do
+                colorize_log "${line}"
+            done
+        else
+            gum style --foreground="${COLOR_MUTED}" "No logs available"
+        fi
+
+        echo ""
+        gum style --foreground="${COLOR_MUTED}" --height 1 "$(printf '%*s' 80 '' | tr ' ' '─')"
+        echo ""
+    done
+}
+
+# Interactive log viewer
+interactive_viewer() {
+    local service
+    local lines
+    local follow=false
+
+    # Select service
+    service=$(gum choose \
+        --header "Select service to view logs:" \
+        "n8n" \
+        "postgres" \
+        "redis" \
+        "rabbitmq" \
+        "nginx" \
+        "jobsprint" \
+        "all")
+
+    [ -z "${service}" ] && return 0
+
+    if [ "${service}" = "all" ]; then
+        lines=$(gum input --placeholder "Number of lines (default: ${DEFAULT_LINES})" --value "${DEFAULT_LINES}")
+        view_all_logs "${lines}"
+        return $?
+    fi
+
+    # Choose mode
+    local mode
+    mode=$(gum choose \
+        --header "Select viewing mode:" \
+        "view" \
+        "tail (follow)" \
+        "filter by level" \
+        "search")
+
+    [ -z "${mode}" ] && return 0
+
+    case "${mode}" in
+        "view")
+            lines=$(gum input --placeholder "Number of lines" --value "${DEFAULT_LINES}")
+            view_logs "${service}" "${lines}" false
+            ;;
+        "tail (follow)")
+            view_logs "${service}" "${DEFAULT_LINES}" true
+            ;;
+        "filter by level")
+            local level
+            level=$(gum choose --header "Select log level:" "ERROR" "WARN" "INFO" "DEBUG")
+            view_logs "${service}" "${DEFAULT_LINES}" false "${level}"
+            ;;
+        "search")
+            local pattern
+            pattern=$(gum input --placeholder "Search pattern...")
+            view_logs "${service}" "${DEFAULT_LINES}" false "" "${pattern}"
+            ;;
+    esac
+}
+
+# Export logs to file
+export_logs() {
+    local service="$1"
+    local output_file="${2:-jobsprint-logs-$(date +%Y%m%d-%H%M%S).txt}"
+
+    log_info "Exporting logs to ${output_file}..."
+
+    {
+        echo "Jobsprint Logs Export"
+        echo "Generated: $(date)"
+        echo "Service: ${service}"
+        echo "=========================================="
+        echo ""
+
+        if [ "${service}" = "all" ]; then
+            for svc in "${SERVICES[@]}"; do
+                echo "=== ${svc} ==="
+                echo ""
+                local log_file="${SERVICE_LOGS[${svc}]}"
+                if [ -f "${log_file}" ]; then
+                    cat "${log_file}"
+                else
+                    echo "No logs available"
+                fi
+                echo ""
+                echo ""
+            done
+        else
+            local log_file="${SERVICE_LOGS[${service}]}"
+            if [ -f "${log_file}" ]; then
+                cat "${log_file}"
+            else
+                echo "No logs available for ${service}"
+            fi
+        fi
+    } > "${output_file}"
+
+    log_success "Logs exported to ${output_file}"
+}
+
+# Show log statistics
+show_log_stats() {
+    show_header "Log Statistics" "Summary Information"
+    echo ""
+
+    for service in "${SERVICES[@]}"; do
+        local log_file="${SERVICE_LOGS[${service}]}"
+
+        gum style --foreground="${COLOR_PRIMARY}" --bold "${service}"
+
+        if [ ! -f "${log_file}" ]; then
+            gum style --foreground="${COLOR_MUTED}" "  No log file"
+            echo ""
+            continue
+        fi
+
+        # Get stats
+        local total_lines
+        local errors
+        local warnings
+        local file_size
+
+        total_lines=$(wc -l < "${log_file}" 2>/dev/null || echo "0")
+        errors=$(grep -ci "error" "${log_file}" 2>/dev/null || echo "0")
+        warnings=$(grep -ci "warn" "${log_file}" 2>/dev/null || echo "0")
+        file_size=$(du -h "${log_file}" 2>/dev/null | cut -f1 || echo "unknown")
+
+        gum style --foreground="${COLOR_INFO}" \
+            "  Size: ${file_size} | Lines: ${total_lines} | Errors: ${errors} | Warnings: ${warnings}"
+        echo ""
+    done
+}
+
+# Main execution
+main() {
+    local specific_service=""
+    local lines="${DEFAULT_LINES}"
+    local follow=false
+    local filter=""
+    local search=""
+    local export_file=""
+    local interactive=false
+    local stats=false
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_logs_help
+                exit 0
+                ;;
+            -v|--verbose)
+                set -x
+                shift
+                ;;
+            -q|--quiet)
+                QUIET=true
+                shift
+                ;;
+            -n|--lines)
+                lines="$2"
+                shift 2
+                ;;
+            -f|--follow)
+                follow=true
+                shift
+                ;;
+            -s|--service)
+                specific_service="$2"
+                shift 2
+                ;;
+            --filter)
+                filter="$2"
+                shift 2
+                ;;
+            --search)
+                search="$2"
+                shift 2
+                ;;
+            --export)
+                export_file="$2"
+                shift 2
+                ;;
+            -i|--interactive)
+                interactive=true
+                shift
+                ;;
+            --stats)
+                stats=true
+                shift
+                ;;
+            *)
+                if [[ " ${SERVICES[@]} jobsprint all " =~ " $1 " ]]; then
+                    specific_service="$1"
+                fi
+                shift
+                ;;
+        esac
+    done
+
+    # Check requirements
+    ensure_directories
+
+    if ! check_requirements gum; then
+        error_exit "Missing required dependency: gum"
+    fi
+
+    # Execute based on mode
+    if [ "${stats}" = "true" ]; then
+        show_log_stats
+    elif [ -n "${export_file}" ]; then
+        export_logs "${specific_service:-all}" "${export_file}"
+    elif [ "${interactive}" = "true" ]; then
+        interactive_viewer
+    elif [ -n "${specific_service}" ]; then
+        if [ "${specific_service}" = "all" ]; then
+            view_all_logs "${lines}" "${filter}" "${search}"
+        else
+            view_logs "${specific_service}" "${lines}" "${follow}" "${filter}" "${search}"
+        fi
+    else
+        interactive_viewer
+    fi
+}
+
+# Run main
+main "$@"

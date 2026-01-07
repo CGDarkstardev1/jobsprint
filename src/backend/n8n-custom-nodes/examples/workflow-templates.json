@@ -1,0 +1,432 @@
+{
+  "workflowTemplates": [
+    {
+      "name": "AI Content Generator",
+      "description": "Generate content using AI and save to cloud storage",
+      "nodes": [
+        {
+          "name": "Webhook Trigger",
+          "type": "jobsprintWebhookHandler",
+          "position": [250, 300],
+          "parameters": {
+            "path": "content-generator",
+            "responseMode": "lastNode",
+            "authentication": "apiKey",
+            "apiKey": "your-webhook-api-key"
+          }
+        },
+        {
+          "name": "Generate Content",
+          "type": "jobsprintAI",
+          "position": [450, 300],
+          "parameters": {
+            "operation": "text",
+            "model": "text-davinci-003",
+            "prompt": "={{ 'Write a ' + $json.content_type + ' about: ' + $json.topic }}",
+            "maxTokens": 1500,
+            "temperature": 0.7
+          }
+        },
+        {
+          "name": "Save to Storage",
+          "type": "jobsprintPuterStorage",
+          "position": [650, 300],
+          "parameters": {
+            "resource": "file",
+            "operation": "upload",
+            "filePath": "={{ 'content/' + $json.content_type + '/' + $now.format('yyyy-MM-dd') + '.txt' }}",
+            "fileContent": "={{ $json.response }}",
+            "encoding": "utf8"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Email to Slack Summarizer",
+      "description": "Monitor Gmail, summarize emails with AI, post to Slack",
+      "nodes": [
+        {
+          "name": "Schedule Trigger",
+          "type": "jobsprintWorkflowTrigger",
+          "position": [250, 300],
+          "parameters": {
+            "triggerType": "schedule",
+            "cronExpression": "0 */2 * * *"
+          }
+        },
+        {
+          "name": "Gmail Trigger",
+          "type": "jobsprintZapier",
+          "position": [450, 300],
+          "parameters": {
+            "resource": "trigger",
+            "app": "gmail",
+            "trigger": "newEmail"
+          }
+        },
+        {
+          "name": "Summarize Email",
+          "type": "jobsprintAI",
+          "position": [650, 300],
+          "parameters": {
+            "operation": "chat",
+            "model": "gpt-3.5-turbo",
+            "messages": {
+              "messages": [
+                {
+                  "role": "system",
+                  "content": "You are an email summarization assistant. Create concise 2-3 bullet point summaries."
+                },
+                {
+                  "role": "user",
+                  "content": "={{ 'Subject: ' + $json.subject + '\\n\\nFrom: ' + $json.from + '\\n\\n' + $json.body }}"
+                }
+              ]
+            },
+            "maxTokens": 500,
+            "temperature": 0.5
+          }
+        },
+        {
+          "name": "Post to Slack",
+          "type": "jobsprintZapier",
+          "position": [850, 300],
+          "parameters": {
+            "resource": "action",
+            "app": "slack",
+            "action": "sendMessage",
+            "parameters": {
+              "parameters": [
+                {
+                  "name": "channel",
+                  "value": "#email-summaries"
+                },
+                {
+                  "name": "text",
+                  "value": "={{ '*Email Summary*\\n\\n' + $json.response }}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "File Processor with AI",
+      "description": "Upload files, process with AI, save results",
+      "nodes": [
+        {
+          "name": "Webhook Upload",
+          "type": "jobsprintWebhookHandler",
+          "position": [250, 300],
+          "parameters": {
+            "path": "file-upload",
+            "responseMode": "lastNode"
+          }
+        },
+        {
+          "name": "Save Original",
+          "type": "jobsprintPuterStorage",
+          "position": [450, 200],
+          "parameters": {
+            "resource": "file",
+            "operation": "upload",
+            "filePath": "={{ 'uploads/' + $json.filename }}",
+            "fileContent": "={{ $json.content }}",
+            "encoding": "={{ $json.encoding }}"
+          }
+        },
+        {
+          "name": "Process with AI",
+          "type": "jobsprintAI",
+          "position": [650, 300],
+          "parameters": {
+            "operation": "chat",
+            "model": "gpt-3.5-turbo",
+            "messages": {
+              "messages": [
+                {
+                  "role": "system",
+                  "content": "You are a document processing assistant. Extract key information from documents."
+                },
+                {
+                  "role": "user",
+                  "content": "={{ 'Process this document and extract key information:\\n\\n' + $json.content }}"
+                }
+              ]
+            },
+            "maxTokens": 2000,
+            "temperature": 0.3
+          }
+        },
+        {
+          "name": "Save Results",
+          "type": "jobsprintPuterStorage",
+          "position": [850, 300],
+          "parameters": {
+            "resource": "file",
+            "operation": "upload",
+            "filePath": "={{ 'processed/' + $json.filename.replace(/\\.[^/.]+$/, '') + '-processed.json' }}",
+            "fileContent": "={{ JSON.stringify({ extracted: $json.response, timestamp: $now.toISO() }, null, 2) }}",
+            "encoding": "utf8"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Multi-Step Workflow Automation",
+      "description": "Complex workflow with storage, AI, and multiple integrations",
+      "nodes": [
+        {
+          "name": "Event Trigger",
+          "type": "jobsprintWorkflowTrigger",
+          "position": [250, 300],
+          "parameters": {
+            "triggerType": "event",
+            "eventType": "file.created",
+            "eventFilter": "{\"source\": \"uploads\"}"
+          }
+        },
+        {
+          "name": "Download File",
+          "type": "jobsprintPuterStorage",
+          "position": [450, 300],
+          "parameters": {
+            "resource": "file",
+            "operation": "download",
+            "filePath": "={{ $json.data.path }}"
+          }
+        },
+        {
+          "name": "Analyze with AI",
+          "type": "jobsprintAI",
+          "position": [650, 300],
+          "parameters": {
+            "operation": "chat",
+            "model": "gpt-3.5-turbo",
+            "messages": {
+              "messages": [
+                {
+                  "role": "system",
+                  "content": "You are an AI assistant that analyzes file content and suggests actions."
+                },
+                {
+                  "role": "user",
+                  "content": "={{ 'Analyze this file content and suggest next actions:\\n\\n' + $json.result.content }}"
+                }
+              ]
+            },
+            "maxTokens": 1000,
+            "temperature": 0.5
+          }
+        },
+        {
+          "name": "Route Based on Analysis",
+          "type": "n8n-nodes-base.switch",
+          "position": [850, 300],
+          "parameters": {
+            "rules": {
+              "values": [
+                {
+                  "output": "approve",
+                  "conditions": {
+                    "options": {
+                      "caseSensitive": true,
+                      "leftValue": "",
+                      "typeValidation": "strict"
+                    },
+                    "conditions": [
+                      {
+                        "leftValue": "={{ $json.response.toLowerCase() }}",
+                        "rightValue": "approve",
+                        "operator": {
+                          "type": "string",
+                          "operation": "contains"
+                        }
+                      }
+                    ],
+                    "combinator": "and"
+                  }
+                },
+                {
+                  "output": "review",
+                  "conditions": {
+                    "options": {
+                      "caseSensitive": true,
+                      "leftValue": "",
+                      "typeValidation": "strict"
+                    },
+                    "conditions": [
+                      {
+                        "leftValue": "={{ $json.response.toLowerCase() }}",
+                        "rightValue": "review",
+                        "operator": {
+                          "type": "string",
+                          "operation": "contains"
+                        }
+                      }
+                    ],
+                    "combinator": "and"
+                  }
+                }
+              ]
+            },
+            "fallbackOutput": "manual"
+          }
+        },
+        {
+          "name": "Auto-Approve Action",
+          "type": "jobsprintZapier",
+          "position": [1050, 200],
+          "parameters": {
+            "resource": "action",
+            "app": "slack",
+            "action": "sendMessage",
+            "parameters": {
+              "parameters": [
+                {
+                  "name": "channel",
+                  "value": "#approvals"
+                },
+                {
+                  "name": "text",
+                  "value": "=:white_check_mark: Auto-approved: {{ $json.data.path }}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Request Review",
+          "type": "jobsprintZapier",
+          "position": [1050, 400],
+          "parameters": {
+            "resource": "action",
+            "app": "gmail",
+            "action": "sendEmail",
+            "parameters": {
+              "parameters": [
+                {
+                  "name": "to",
+                  "value": "reviewer@example.com"
+                },
+                {
+                  "name": "subject",
+                  "value": "=Review Required: {{ $json.data.path }}"
+                },
+                {
+                  "name": "body",
+                  "value": "={{ 'AI Analysis:\\n\\n' + $json.response + '\\n\\nPlease review and approve.' }}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Scheduled Report Generator",
+      "description": "Generate daily reports with data analysis and AI insights",
+      "nodes": [
+        {
+          "name": "Daily Schedule",
+          "type": "jobsprintWorkflowTrigger",
+          "position": [250, 300],
+          "parameters": {
+            "triggerType": "schedule",
+            "cronExpression": "0 9 * * 1-5"
+          }
+        },
+        {
+          "name": "Fetch Data from Storage",
+          "type": "jobsprintPuterStorage",
+          "position": [450, 200],
+          "parameters": {
+            "resource": "folder",
+            "operation": "list",
+            "folderPath": "/data/yesterday",
+            "recursive": true
+          }
+        },
+        {
+          "name": "Aggregate Data",
+          "type": "n8n-nodes-base.function",
+          "position": [650, 200],
+          "parameters": {
+            "functionCode": "const files = $input.all();\nconst aggregated = {\n  totalFiles: files.length,\n  totalSize: files.reduce((sum, f) => sum + f.json.size, 0),\n  fileTypes: files.reduce((acc, f) => {\n    const ext = f.json.name.split('.').pop();\n    acc[ext] = (acc[ext] || 0) + 1;\n    return acc;\n  }, {})\n};\nreturn [{ json: aggregated }];"
+          }
+        },
+        {
+          "name": "Generate AI Insights",
+          "type": "jobsprintAI",
+          "position": [850, 200],
+          "parameters": {
+            "operation": "chat",
+            "model": "gpt-3.5-turbo",
+            "messages": {
+              "messages": [
+                {
+                  "role": "system",
+                  "content": "You are a data analyst. Provide insights and recommendations based on data."
+                },
+                {
+                  "role": "user",
+                  "content": "={{ 'Analyze this data and provide insights:\\n\\n' + JSON.stringify($json, null, 2) }}"
+                }
+              ]
+            },
+            "maxTokens": 1500,
+            "temperature": 0.7
+          }
+        },
+        {
+          "name": "Create Report",
+          "type": "n8n-nodes-base.merge",
+          "position": [1050, 200],
+          "parameters": {
+            "mode": "combine",
+            "combinationMode": "mergeByPosition"
+          }
+        },
+        {
+          "name": "Save Report",
+          "type": "jobsprintPuterStorage",
+          "position": [1250, 200],
+          "parameters": {
+            "resource": "file",
+            "operation": "upload",
+            "filePath": "={{ 'reports/daily/' + $now.format('yyyy-MM-dd') + '.md' }}",
+            "fileContent": "={{ '# Daily Report - ' + $now.format('yyyy-MM-dd') + '\\n\\n## Data Summary\\n\\n' + JSON.stringify($json, null, 2) + '\\n\\n## AI Insights\\n\\n' + $json.aiInsights }}",
+            "encoding": "utf8"
+          }
+        },
+        {
+          "name": "Email Report",
+          "type": "jobsprintZapier",
+          "position": [1250, 400],
+          "parameters": {
+            "resource": "action",
+            "app": "gmail",
+            "action": "sendEmail",
+            "parameters": {
+              "parameters": [
+                {
+                  "name": "to",
+                  "value": "team@example.com"
+                },
+                {
+                  "name": "subject",
+                  "value": "=Daily Report - {{ $now.format('yyyy-MM-dd') }}"
+                },
+                {
+                  "name": "body",
+                  "value": "={{ 'Daily report is ready.\\n\\nSummary:\\n' + $json.aiInsights }}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

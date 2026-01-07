@@ -1,0 +1,80 @@
+version: '3.9'
+
+# Development Docker Compose Override
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=dev
+      - POSTGRES_PASSWORD=dev
+      - POSTGRES_DB=jobsprint_dev
+
+  redis:
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly no
+
+  rabbitmq:
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=dev
+      - RABBITMQ_DEFAULT_PASS=dev
+
+  n8n:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    environment:
+      - NODE_ENV=development
+      - N8N_HOST=localhost
+      - WEBHOOK_URL=http://localhost:5678/
+    volumes:
+      - ./src/n8n:/app/src/n8n
+      - ./packages:/app/packages
+    command: npm run dev:n8n
+
+  jobsprint-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+      - HOT_RELOAD=true
+    volumes:
+      - ./src:/app/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+      - "9229:9229"  # Node.js debugging
+    command: npm run dev
+
+  # Add development tools
+  adminer:
+    image: adminer:latest
+    container_name: jobsprint-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - jobsprint-network
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: jobsprint-redis-commander
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    networks:
+      - jobsprint-network

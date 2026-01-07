@@ -1,0 +1,323 @@
+#!/usr/bin/env bash
+# Jobsprint Service Status Monitor
+# Display status and health metrics for all Jobsprint services
+
+set -euo pipefail
+
+# Source configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/config.sh"
+
+# Script metadata
+readonly SCRIPT_NAME="puter-status"
+readonly SCRIPT_VERSION="1.0.0"
+
+# Refresh interval for watch mode (seconds)
+readonly WATCH_INTERVAL=5
+
+# Display help
+show_status_help() {
+    show_help "${SCRIPT_NAME}" "Show status of Jobsprint services" \
+        "Display real-time status and health metrics for all Jobsprint services." \
+        "" \
+        "Shows the following information for each service:" \
+        "  • Status (running/stopped)" \
+        "  • Uptime and start time" \
+        "  • Memory usage" \
+        "  • CPU usage" \
+        "  • Port information" \
+        "" \
+        "Services are color-coded by status:" \
+        "  Green - Running" \
+        "  Red - Stopped" \
+        "  Yellow - Degraded"
+}
+
+# Display service status line
+display_service_line() {
+    local service="$1"
+    local status="$2"
+    local uptime="$3"
+    local memory="$4"
+    local cpu="$5"
+    local port=""
+
+    # Get service port
+    case "${service}" in
+        n8n) port="${N8N_PORT}" ;;
+        postgres) port="${POSTGRES_PORT}" ;;
+        redis) port="${REDIS_PORT}" ;;
+        rabbitmq) port="${RABBITMQ_PORT}" ;;
+        nginx) port="${NGINX_PORT}" ;;
+    esac
+
+    # Color based on status
+    local status_color
+    local status_icon
+
+    if [ "${status}" = "running" ]; then
+        status_color="${COLOR_SUCCESS}"
+        status_icon="●"
+    else
+        status_color="${COLOR_ERROR}"
+        status_icon="○"
+    fi
+
+    # Build status line
+    gum join \
+        --vertical \
+        "$(gum style --foreground="${COLOR_PRIMARY}" --width 15 "${service}")" \
+        "$(gum style --foreground="${status_color}" --width 10 "${status_icon} ${status}")" \
+        "$(gum style --foreground="${COLOR_INFO}" --width 25 "${uptime}")" \
+        "$(gum style --foreground="${COLOR_MUTED}" --width 12 "${memory}")" \
+        "$(gum style --foreground="${COLOR_MUTED}" --width 10 "${cpu}")" \
+        "$(gum style --foreground="${COLOR_SECONDARY}" --width 8 ":${port}")"
+}
+
+# Display service details
+display_service_details() {
+    local service="$1"
+
+    IFS='|' read -r status uptime memory cpu <<< "$(get_service_status "${service}")"
+
+    display_service_line "${service}" "${status}" "${uptime}" "${memory}" "${cpu}"
+}
+
+# Display status header
+display_header() {
+    gum join \
+        --vertical \
+        "$(gum style --foreground="${COLOR_PRIMARY}" --bold --width 15 "SERVICE")" \
+        "$(gum style --foreground="${COLOR_PRIMARY}" --bold --width 10 "STATUS")" \
+        "$(gum style --foreground="${COLOR_PRIMARY}" --bold --width 25 "UPTIME")" \
+        "$(gum style --foreground="${COLOR_PRIMARY}" --bold --width 12 "MEMORY")" \
+        "$(gum style --foreground="${COLOR_PRIMARY}" --bold --width 10 "CPU")" \
+        "$(gum style --foreground="${COLOR_PRIMARY}" --bold --width 8 "PORT")"
+
+    gum style --foreground="${COLOR_MUTED}" --height 1 "$(printf '%*s' 80 '' | tr ' ' '─')"
+}
+
+# Display full status dashboard
+display_status_dashboard() {
+    show_header "Jobsprint Status" "System Health Monitor"
+    echo ""
+
+    # System info
+    local hostname
+    local timestamp
+    local uptime
+
+    hostname=$(hostname)
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    uptime=$(uptime -p 2>/dev/null || uptime | awk '{print $3,$4}')
+
+    gum style \
+        --foreground="${COLOR_MUTED}" \
+        "Host: ${hostname} | Time: ${timestamp} | Uptime: ${uptime}"
+
+    echo ""
+
+    # Service status
+    display_header
+
+    for service in "${SERVICES[@]}"; do
+        display_service_details "${service}"
+    done
+
+    echo ""
+
+    # Summary
+    local running=0
+    local stopped=0
+
+    for service in "${SERVICES[@]}"; do
+        status=$(check_service "${service}")
+        if [ "${status}" = "running" ]; then
+            ((running++))
+        else
+            ((stopped++))
+        fi
+    done
+
+    gum style \
+        --foreground="${COLOR_SUCCESS}" \
+        "Running: ${running}" \
+        "$(gum style --foreground="${COLOR_ERROR}" " | Stopped: ${stopped}")" \
+        "$(gum style --foreground="${COLOR_INFO}" " | Total: $((running + stopped))")"
+}
+
+# Watch mode - continuously refresh status
+watch_mode() {
+    log_info "Starting watch mode (refresh every ${WATCH_INTERVAL}s)"
+    log_info "Press Ctrl+C to exit"
+    echo ""
+
+    while true; do
+        clear
+        display_status_dashboard
+        sleep "${WATCH_INTERVAL}"
+    done
+}
+
+# JSON output for scripting
+json_output() {
+    echo "{"
+    echo "  \"timestamp\": \"$(date -Iseconds)\","
+    echo "  \"services\": {"
+
+    local first=true
+    for service in "${SERVICES[@]}"; do
+        if [ "${first}" = "true" ]; then
+            first=false
+        else
+            echo ","
+        fi
+
+        IFS='|' read -r status uptime memory cpu <<< "$(get_service_status "${service}")"
+
+        echo -n "    \"${service}\": {"
+        echo -n "\"status\": \"${status}\", "
+        echo -n "\"uptime\": \"${uptime}\", "
+        echo -n "\"memory\": \"${memory}\", "
+        echo -n "\"cpu\": \"${cpu}\""
+        echo -n "}"
+    done
+
+    echo ""
+    echo "  }"
+    echo "}"
+}
+
+# Single service status
+service_status() {
+    local service="$1"
+
+    if [[ ! " ${SERVICES[@]} " =~ " ${service} " ]]; then
+        log_error "Unknown service: ${service}"
+        echo ""
+        echo "Available services:"
+        printf '  - %s\n' "${SERVICES[@]}"
+        return 1
+    fi
+
+    show_header "${service} Status" "Detailed Information"
+    echo ""
+
+    IFS='|' read -r status uptime memory cpu <<< "$(get_service_status "${service}")"
+
+    # Status indicator
+    if [ "${status}" = "running" ]; then
+        gum style \
+            --foreground="${COLOR_SUCCESS}" \
+            --border double \
+            --border-foreground="${COLOR_SUCCESS}" \
+            --align center \
+            --padding "1 2" \
+            "● ${service} is RUNNING"
+    else
+        gum style \
+            --foreground="${COLOR_ERROR}" \
+            --border double \
+            --border-foreground="${COLOR_ERROR}" \
+            --align center \
+            --padding "1 2" \
+            "○ ${service} is STOPPED"
+    fi
+
+    echo ""
+
+    # Details table
+    gum style --foreground="${COLOR_PRIMARY}" --bold "Details"
+    echo ""
+
+    gum format --type="markdown" <<-EOF
+    **Status**: ${status}
+    **Uptime**: ${uptime}
+    **Memory**: ${memory}
+    **CPU**: ${cpu}
+EOF
+
+    echo ""
+
+    # Service-specific information
+    case "${service}" in
+        n8n)
+            echo "Web Interface: http://localhost:${N8N_PORT}"
+            ;;
+        postgres)
+            echo "Connection: postgresql://localhost:${POSTGRES_PORT}"
+            ;;
+        redis)
+            echo "Connection: redis://localhost:${REDIS_PORT}"
+            ;;
+        rabbitmq)
+            echo "Management: http://localhost:15672"
+            echo "AMQP: localhost:${RABBITMQ_PORT}"
+            ;;
+        nginx)
+            echo "HTTP: http://localhost:${NGINX_PORT}"
+            ;;
+    esac
+}
+
+# Main execution
+main() {
+    local watch=false
+    local json=false
+    local specific_service=""
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_status_help
+                exit 0
+                ;;
+            -v|--verbose)
+                set -x
+                shift
+                ;;
+            -q|--quiet)
+                QUIET=true
+                shift
+                ;;
+            --watch|-w)
+                watch=true
+                shift
+                ;;
+            --json|-j)
+                json=true
+                shift
+                ;;
+            --service|-s)
+                specific_service="$2"
+                shift 2
+                ;;
+            *)
+                if [[ " ${SERVICES[@]} " =~ " $1 " ]]; then
+                    specific_service="$1"
+                fi
+                shift
+                ;;
+        esac
+    done
+
+    # Check requirements
+    if ! check_requirements gum; then
+        error_exit "Missing required dependency: gum"
+    fi
+
+    # Execute based on mode
+    if [ -n "${specific_service}" ]; then
+        service_status "${specific_service}"
+    elif [ "${json}" = "true" ]; then
+        json_output
+    elif [ "${watch}" = "true" ]; then
+        watch_mode
+    else
+        display_status_dashboard
+    fi
+}
+
+# Run main
+main "$@"
