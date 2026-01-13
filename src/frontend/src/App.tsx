@@ -7,6 +7,8 @@ import { ResumePage } from '@/pages/ResumePage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { InterviewPrepPage } from '@/pages/InterviewPrepPage';
 import { PricingPage } from '@/pages/PricingPage';
+import { ComparisonPage } from '@/pages/ComparisonPage';
+import { NetworkInspectorPage } from '@/pages/NetworkInspectorPage';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
           <Route path="interview-prep" element={<InterviewPrepPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="pricing" element={<PricingPage />} />
+          <Route path="comparison" element={<ComparisonPage />} />
+          <Route path="network-inspector" element={<NetworkInspectorPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

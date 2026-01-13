@@ -48,9 +48,35 @@ export function Footer() {
             <h3 className="font-semibold">Resources</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
+                <Link to="/pricing" className="hover:text-foreground transition-colors">
+                  Pricing
+                </Link>
+              </li>
+              <li>
+                <Link to="/comparison" className="hover:text-foreground transition-colors">
+                  Why JobSprint?
+                </Link>
+              </li>
+              <li>
                 <a href="#" className="hover:text-foreground transition-colors">
                   Documentation
                 </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-foreground transition-colors">
+                  Support
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="font-semibold">Dev Tools</h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>
+                <Link to="/network-inspector" className="hover:text-foreground transition-colors text-amber-600 font-medium">
+                  Network Inspector
+                </Link>
               </li>
               <li>
                 <a href="#" className="hover:text-foreground transition-colors">
@@ -59,33 +85,7 @@ export function Footer() {
               </li>
               <li>
                 <a href="#" className="hover:text-foreground transition-colors">
-                  Support
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-foreground transition-colors">
-                  Blog
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div className="space-y-3">
-            <h3 className="font-semibold">Legal</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <a href="#" className="hover:text-foreground transition-colors">
-                  Privacy Policy
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-foreground transition-colors">
-                  Terms of Service
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-foreground transition-colors">
-                  Cookie Policy
+                  Status
                 </a>
               </li>
             </ul>
