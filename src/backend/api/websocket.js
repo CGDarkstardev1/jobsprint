@@ -5,8 +5,11 @@
 
 import WebSocket, { WebSocketServer } from 'ws';
 
+let wssRef = null;
+
 export function initWebSocket(server) {
   const wss = new WebSocketServer({ server });
+  wssRef = wss;
   console.log('[WebSocket] Server initialized');
 
   wss.on('connection', (ws) => {
@@ -37,3 +40,17 @@ export function initWebSocket(server) {
 
   return wss;
 }
+
+export const webSocketService = {
+  broadcast: (type, payload) => {
+    if (!wssRef) return;
+    const msg = JSON.stringify({ type, payload, ts: new Date().toISOString() });
+    for (const client of wssRef.clients) {
+      try {
+        if (client.readyState === WebSocket.OPEN) client.send(msg);
+      } catch (e) {
+        console.warn('[WebSocket] broadcast failed:', e.message);
+      }
+    }
+  },
+};

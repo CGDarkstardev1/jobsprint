@@ -6,6 +6,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import http from 'http';
 
 // Load environment variables
 dotenv.config();
@@ -15,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware
@@ -33,7 +34,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API Routes
+// Basic API info
 app.get('/api/v1', (req, res) => {
   res.json({
     name: 'Jobsprint API',
@@ -42,53 +43,34 @@ app.get('/api/v1', (req, res) => {
   });
 });
 
-// Connectors (mock)
+// Register routers (connectors, oauth, documents, ai)
 import connectorsRouter from './connectors.js';
+import googleOAuthRouter from './googleOAuth.js';
+import documentsRouter from './documents.js';
+import aiRouter from './ai.js';
+
 app.use('/api/v1', connectorsRouter);
+app.use('/api/v1', googleOAuthRouter);
+app.use('/api/v1', documentsRouter);
+app.use('/api/v1', aiRouter);
 
-// WebSocket server
-import http from 'http';
+// Create HTTP server and websocket server
 import { initWebSocket } from './websocket.js';
-
 const server = http.createServer(app);
 const wss = initWebSocket(server);
 
-server.listen(PORT, () => {
-    console.log(`🚀 Jobsprint API server running on port ${PORT}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/health`);
-    console.log(`📖 API docs: http://localhost:${PORT}/api/v1`);
-});
+server.listen(PORT, () => console.log(`🚀 Jobsprint API server running on port ${PORT}`));
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-    console.log('SIGTERM signal received: closing HTTP server');
-    server.close();
-    process.exit(0);
+  console.log('SIGTERM signal received: closing HTTP server');
+  server.close();
+  process.exit(0);
 });
-
 process.on('SIGINT', () => {
-    console.log('SIGINT signal received: closing HTTP server');
-    server.close();
-    process.exit(0);
-});
-
-export default app;
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Not Found',
-    message: `Cannot ${req.method} ${req.path}`,
-  });
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-  });
+  console.log('SIGINT signal received: closing HTTP server');
+  server.close();
+  process.exit(0);
 });
 
 // Start server
