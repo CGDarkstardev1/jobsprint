@@ -4,7 +4,7 @@ import puter from '../utils/ai-client.js';
 import dotenv from 'dotenv';
 import { browserManager } from './BrowserManager.js';
 import { AutoApplyService } from './autoApply.js';
-import { webSocketService } from './websocket.js';
+import { webSocketService } from '../../../backend/api/websocket.js';
 import { agentDB } from './agentDb.js';
 import { imageResizeUtil } from '../utils/image-resize.js';
 import { stealthService } from './stealth.js';
