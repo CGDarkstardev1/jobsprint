@@ -438,45 +438,7 @@ Important:
                 await this.stealth.humanTyping(currentPage, decision.target, decision.value);
               }
               break;
-            case 'CLICK':
-              if (decision.point) {
-                // Superior coordinate-based click with scale translation
-                const targetX = Math.round(decision.point.x * scaleX);
-                const targetY = Math.round(decision.point.y * scaleY);
-                logger.info(
-                  `Superior Click at (${targetX}, ${targetY}) translated from AI point (${decision.point.x}, ${decision.point.y})`
-                );
-                await this.stealth.mouseCurve(currentPage, { x: targetX, y: targetY });
-                await currentPage.mouse.down();
-                await currentPage.mouse.up();
-              } else {
-                await this.stealth.humanClick(currentPage, decision.target);
-              }
-              break;
-            case 'TYPE':
-              if (decision.point) {
-                // Superior coordinate-based focus then type
-                const targetX = Math.round(decision.point.x * scaleX);
-                const targetY = Math.round(decision.point.y * scaleY);
-                await this.stealth.mouseCurve(currentPage, { x: targetX, y: targetY });
-                await currentPage.mouse.click(targetX, targetY);
-                await this.stealth.humanTyping(currentPage, null, decision.value, {
-                  directType: true,
-                });
-              } else {
-                await this.stealth.humanTyping(currentPage, decision.target, decision.value);
-              }
-              break;
-            case 'CLICK':
-              // Use stealth human click
-              await this.stealth.humanClick(currentPage, decision.target);
-              break;
-            case 'TYPE':
-              // Use stealth human typing instead of direct fill
-              await this.stealth.humanTyping(currentPage, decision.target, decision.value);
-              break;
             case 'SCROLL':
-              // Use stealth human scroll
               await this.stealth.humanScroll(
                 currentPage,
                 decision.value || 500,

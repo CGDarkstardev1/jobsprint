@@ -228,7 +228,7 @@ export class StealthService {
     // Add natural variation (±20%)
     const actualTime = this._naturalRandom(readingTimeMs * 0.8, readingTimeMs * 1.2);
 
-    logger.debug(`Simulating reading ${words} words: ${Math.round(actualTimeMs)}ms`);
+    logger.debug(`Simulating reading ${words} words: ${Math.round(actualTime)}ms`);
 
     await this._sleep(actualTime);
 

@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JobSprint AI - Multi-Threaded Job Search Automation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg-primary: #0a0a0b;
+        --bg-secondary: #131316;
+        --bg-tertiary: #1c1c21;
+        --text-primary: #fafafa;
+        --text-secondary: #a1a1aa;
+        --text-muted: #71717a;
+        --accent-primary: #6366f1;
+        --accent-secondary: #8b5cf6;
+        --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        --border-color: #27272a;
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --card-hover: rgba(255, 255, 255, 0.06);
+      }
+
+      body {
+        font-family:
+          'Inter',
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      /* Background Effects */
+      .bg-gradient {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: -1;
+        overflow: hidden;
+      }
+
+      .bg-gradient::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(99, 102, 241, 0.08) 0%,
+          transparent 50%
+        );
+        animation: pulse 15s ease-in-out infinite;
+      }
+
+      .bg-gradient::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        right: -30%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle at 80% 20%,
+          rgba(139, 92, 246, 0.06) 0%,
+          transparent 40%
+        );
+        animation: pulse 20s ease-in-out infinite reverse;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.6;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+      }
+
+      /* Navigation */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        padding: 1rem 2rem;
+        background: rgba(10, 10, 11, 0.8);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        color: var(--text-primary);
+      }
+
+      .logo-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--accent-gradient);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+      }
+
+      .logo-text {
+        font-weight: 600;
+        font-size: 1.125rem;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+      }
+
+      .nav-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+
+      .nav-links a:hover {
+        color: var(--text-primary);
+      }
+
+      /* Hero Section */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8rem 2rem 4rem;
+        text-align: center;
+      }
+
+      .hero-content {
+        max-width: 800px;
+      }
+
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 100px;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+      }
+
+      .hero-badge span {
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        font-weight: 700;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.02em;
+      }
+
+      .hero h1 .gradient-text {
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .hero p {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto 2.5rem;
+      }
+
+      .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.75rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+      }
+
+      .btn-primary {
+        background: var(--accent-gradient);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+      }
+
+      .btn-secondary {
+        background: var(--card-bg);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+      }
+
+      .btn-secondary:hover {
+        background: var(--card-hover);
+        border-color: var(--text-muted);
+      }
+
+      /* Stats */
+      .stats {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        padding: 4rem 2rem;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-secondary);
+      }
+
+      .stat {
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+      }
+
+      /* Features Section */
+      .features {
+        padding: 6rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .section-header {
+        text-align: center;
+        margin-bottom: 4rem;
+      }
+
+      .section-header h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .section-header p {
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .feature-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+        transition: all 0.3s;
+      }
+
+      .feature-card:hover {
+        background: var(--card-hover);
+        border-color: var(--accent-primary);
+        transform: translateY(-4px);
+      }
+
+      .feature-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--accent-gradient);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .feature-card h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+      }
+
+      .feature-card p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+      }
+
+      /* Tech Stack */
+      .tech-stack {
+        padding: 6rem 2rem;
+        background: var(--bg-secondary);
+      }
+
+      .tech-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .tech-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+
+      /* Code Example */
+      .code-section {
+        padding: 6rem 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .code-block {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .code-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 1.25rem;
+        background: var(--bg-tertiary);
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .code-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+
+      .code-dot.red {
+        background: #ef4444;
+      }
+      .code-dot.yellow {
+        background: #eab308;
+      }
+      .code-dot.green {
+        background: #22c55e;
+      }
+
+      .code-content {
+        padding: 1.5rem;
+        overflow-x: auto;
+      }
+
+      .code-content pre {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.875rem;
+        line-height: 1.7;
+      }
+
+      .code-content .keyword {
+        color: #c084fc;
+      }
+      .code-content .function {
+        color: #60a5fa;
+      }
+      .code-content .string {
+        color: #4ade80;
+      }
+      .code-content .comment {
+        color: #71717a;
+      }
+
+      /* CTA Section */
+      .cta {
+        padding: 6rem 2rem;
+        text-align: center;
+      }
+
+      .cta h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .cta p {
+        color: var(--text-secondary);
+        max-width: 500px;
+        margin: 0 auto 2rem;
+      }
+
+      /* Footer */
+      footer {
+        padding: 3rem 2rem;
+        border-top: 1px solid var(--border-color);
+        text-align: center;
+      }
+
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .footer-links a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+      }
+
+      .footer-links a:hover {
+        color: var(--text-primary);
+      }
+
+      .footer-copy {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .nav-links {
+          display: none;
+        }
+
+        .stats {
+          flex-direction: column;
+          gap: 2rem;
+        }
+
+        .hero {
+          padding: 6rem 1.5rem 3rem;
+        }
+
+        .features,
+        .tech-stack,
+        .code-section,
+        .cta {
+          padding: 4rem 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-gradient"></div>
+
+    <nav>
+      <div class="nav-container">
+        <a href="https://github.com/CGDarkstardev1/jobsprint" class="logo">
+          <div class="logo-icon">JS</div>
+          <span class="logo-text">JobSprint</span>
+        </a>
+        <ul class="nav-links">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#tech">Tech Stack</a></li>
+          <li><a href="https://github.com/CGDarkstardev1/jobsprint">GitHub</a></li>
+          <li><a href="https://cgdarkstardev1.github.io/jobsprint/">Demo</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span>⚡</span>
+          AI-Powered Automation Platform
+        </div>
+        <h1>
+          Multi-Threaded<br />
+          <span class="gradient-text">Job Search Automation</span>
+        </h1>
+        <p>
+          Smart job search, automated applications, ATS optimization, and resume tailoring. Find and
+          apply to jobs faster with intelligent matching.
+        </p>
+        <div class="hero-buttons">
+          <a href="https://cgdarkstardev1.github.io/jobsprint/" class="btn btn-primary">
+            🚀 Live Demo
+          </a>
+          <a href="https://github.com/CGDarkstardev1/jobsprint" class="btn btn-secondary">
+            ⭐ View on GitHub
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-value">5+</div>
+        <div class="stat-label">Job Platforms</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">AI</div>
+        <div class="stat-label">Resume Tailoring</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">ATS</div>
+        <div class="stat-label">Optimization</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">100%</div>
+        <div class="stat-label">Open Source</div>
+      </div>
+    </section>
+
+    <section class="features" id="features">
+      <div class="section-header">
+        <h2>Key Features</h2>
+        <p>Everything you need to streamline your job search workflow</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3>Smart Job Search</h3>
+          <p>
+            Multi-threaded parallel searches across LinkedIn, Indeed, Glassdoor, RemoteOK, and more
+            with real-time status updates.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📝</div>
+          <h3>AI Resume Tailoring</h3>
+          <p>
+            Automatically tailor your resume for each job application using AI to match keywords and
+            requirements.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">✅</div>
+          <h3>ATS Compatibility</h3>
+          <p>
+            Analyze how well your resume matches job requirements and optimize for Applicant
+            Tracking Systems.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Auto-Apply</h3>
+          <p>
+            One-click automated applications with AI-generated cover letters and application
+            tracking.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>Modern UI</h3>
+          <p>
+            Beautiful React/Tailwind interface with shadcn/ui components and real-time toast
+            notifications.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>Privacy First</h3>
+          <p>All processing happens locally or in your browser. Your data stays yours.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="tech-stack" id="tech">
+      <div class="section-header">
+        <h2>Technology Stack</h2>
+        <p>Built with modern, production-ready technologies</p>
+      </div>
+      <div class="tech-grid">
+        <div class="tech-item">⚛️ React 18</div>
+        <div class="tech-item">📘 TypeScript</div>
+        <div class="tech-item">🎨 Tailwind CSS</div>
+        <div class="tech-item">🧩 shadcn/ui</div>
+        <div class="tech-item">🤖 Puter.js AI</div>
+        <div class="tech-item">🔄 n8n Workflow</div>
+        <div class="tech-item">⚡ Node.js</div>
+        <div class="tech-item">🗄️ PostgreSQL</div>
+        <div class="tech-item">💨 Redis</div>
+        <div class="tech-item">🐳 Docker</div>
+      </div>
+    </section>
+
+    <section class="code-section">
+      <div class="section-header">
+        <h2>Quick Start</h2>
+        <p>Get up and running in minutes</p>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dot red"></div>
+          <div class="code-dot yellow"></div>
+          <div class="code-dot green"></div>
+          <span style="margin-left: 0.5rem; font-size: 0.875rem; color: var(--text-muted)"
+            >terminal</span
+          >
+        </div>
+        <div class="code-content">
+          <pre><span class="comment"># Clone the repository</span>
+git clone https://github.com/CGDarkstardev1/jobsprint.git
+cd jobsprint
+
+<span class="comment"># Start the application</span>
+<span class="keyword">cd</span> src/frontend
+npm install
+npm run dev
+
+<span class="comment"># Open in browser</span>
+<span class="function">open</span> http://localhost:3000</pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <h2>Ready to Accelerate Your Job Search?</h2>
+      <p>Start automating your job applications today with JobSprint AI.</p>
+      <div class="hero-buttons">
+        <a href="https://cgdarkstardev1.github.io/jobsprint/" class="btn btn-primary">
+          🚀 Launch App
+        </a>
+        <a href="https://github.com/CGDarkstardev1/jobsprint" class="btn btn-secondary">
+          📖 Read Documentation
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-links">
+        <a href="https://github.com/CGDarkstardev1/jobsprint">GitHub</a>
+        <a href="https://github.com/CGDarkstardev1/jobsprint/issues">Issues</a>
+        <a href="https://github.com/CGDarkstardev1/jobsprint/blob/main/README.md">Documentation</a>
+      </div>
+      <p class="footer-copy">© 2026 JobSprint AI. Built with ❤️ by the community.</p>
+    </footer>
+
+    <script>
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
+            });
+          }
+        });
+      });
+
+      // Add subtle parallax effect to background
+      document.addEventListener('mousemove', (e) => {
+        const bg = document.querySelector('.bg-gradient');
+        const x = (e.clientX / window.innerWidth - 0.5) * 20;
+        const y = (e.clientY / window.innerHeight - 0.5) * 20;
+        bg.style.transform = `translate(${x}px, ${y}px)`;
+      });
+    </script>
+  </body>
+</html>
