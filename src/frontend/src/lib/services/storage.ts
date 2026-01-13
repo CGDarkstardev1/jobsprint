@@ -37,6 +37,20 @@ export interface ResumeContent {
   education: Education[];
 }
 
+export interface Document {
+  id: string;
+  name: string;
+  kind: 'resume' | 'cover' | 'portfolio' | 'other';
+  content?: any; // Could be text, PDF blob, or structured JSON
+  previewUrl?: string; // object URL for in-browser preview
+  tags?: string[];
+  versions?: Array<{ id: string; createdAt: string; note?: string; content?: any }>;
+  source?: 'local' | 'gdrive' | 'dropbox' | 'onedrive' | 'uploaded' | 'generated';
+  path?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface Experience {
   title: string;
   company: string;
@@ -99,6 +113,9 @@ class StorageService {
         if (!db.objectStoreNames.contains('resumes')) {
           db.createObjectStore('resumes', { keyPath: 'id' });
         }
+        if (!db.objectStoreNames.contains('documents')) {
+          db.createObjectStore('documents', { keyPath: 'id' });
+        }
         resolve();
       };
 
@@ -109,6 +126,9 @@ class StorageService {
         }
         if (!db.objectStoreNames.contains('resumes')) {
           db.createObjectStore('resumes', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('documents')) {
+          db.createObjectStore('documents', { keyPath: 'id' });
         }
       };
     });
@@ -185,6 +205,48 @@ class StorageService {
     });
   }
 
+  // Documents (IndexedDB)
+  async getDocuments(): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('JobSprintDB', 1);
+      request.onsuccess = () => {
+        const db = request.result;
+        const transaction = db.transaction(['documents'], 'readonly');
+        const store = transaction.objectStore('documents');
+        const getAll = store.getAll();
+        getAll.onsuccess = () => resolve(getAll.result || []);
+        getAll.onerror = () => reject(getAll.error);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async saveDocument(doc: {
+    id: string;
+    name: string;
+    content: any;
+    kind: string;
+    createdAt: string;
+    updatedAt?: string;
+    tags?: string[];
+    versions?: any[];
+    source?: string;
+    path?: string;
+  }): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('JobSprintDB', 1);
+      request.onsuccess = () => {
+        const db = request.result;
+        const transaction = db.transaction(['documents'], 'readwrite');
+        const store = transaction.objectStore('documents');
+        const put = store.put(doc);
+        put.onsuccess = () => resolve();
+        put.onerror = () => reject(put.error);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
   async deleteResume(id: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open('JobSprintDB', 1);
@@ -192,6 +254,21 @@ class StorageService {
         const db = request.result;
         const transaction = db.transaction(['resumes'], 'readwrite');
         const store = transaction.objectStore('resumes');
+        const del = store.delete(id);
+        del.onsuccess = () => resolve();
+        del.onerror = () => reject(del.error);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async deleteDocument(id: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('JobSprintDB', 1);
+      request.onsuccess = () => {
+        const db = request.result;
+        const transaction = db.transaction(['documents'], 'readwrite');
+        const store = transaction.objectStore('documents');
         const del = store.delete(id);
         del.onsuccess = () => resolve();
         del.onerror = () => reject(del.error);

@@ -20,47 +20,40 @@ app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware
 app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-    next();
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
 });
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-    res.status(200).json({
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-    });
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
 });
 
 // API Routes
 app.get('/api/v1', (req, res) => {
-    res.json({
-        name: 'Jobsprint API',
-        version: '1.0.0',
-        description: 'AI-powered automation platform API',
-    });
+  res.json({
+    name: 'Jobsprint API',
+    version: '1.0.0',
+    description: 'AI-powered automation platform API',
+  });
 });
 
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({
-        error: 'Not Found',
-        message: `Cannot ${req.method} ${req.path}`,
-    });
-});
+// Connectors (mock)
+import connectorsRouter from './connectors.js';
+app.use('/api/v1', connectorsRouter);
 
-// Error handler
-app.use((err, req, res, next) => {
-    console.error('Error:', err);
-    res.status(err.status || 500).json({
-        error: err.message || 'Internal Server Error',
-        ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-    });
-});
+// WebSocket server
+import http from 'http';
+import { initWebSocket } from './websocket.js';
 
-// Start server
-app.listen(PORT, () => {
+const server = http.createServer(app);
+const wss = initWebSocket(server);
+
+server.listen(PORT, () => {
     console.log(`🚀 Jobsprint API server running on port ${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/health`);
     console.log(`📖 API docs: http://localhost:${PORT}/api/v1`);
@@ -69,12 +62,51 @@ app.listen(PORT, () => {
 // Graceful shutdown
 process.on('SIGTERM', () => {
     console.log('SIGTERM signal received: closing HTTP server');
+    server.close();
     process.exit(0);
 });
 
 process.on('SIGINT', () => {
     console.log('SIGINT signal received: closing HTTP server');
+    server.close();
     process.exit(0);
+});
+
+export default app;
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: `Cannot ${req.method} ${req.path}`,
+  });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(err.status || 500).json({
+    error: err.message || 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Jobsprint API server running on port ${PORT}`);
+  console.log(`📊 Health check: http://localhost:${PORT}/health`);
+  console.log(`📖 API docs: http://localhost:${PORT}/api/v1`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT signal received: closing HTTP server');
+  process.exit(0);
 });
 
 export default app;
