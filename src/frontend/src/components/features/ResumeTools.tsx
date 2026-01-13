@@ -16,25 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-
-interface ATSResult {
-  score: number;
-  matchedKeywords: string[];
-  missingKeywords: string[];
-  suggestions: string[];
-}
-
-const mockATSResult: ATSResult = {
-  score: 78,
-  matchedKeywords: ['React', 'TypeScript', 'Node.js', 'REST APIs', 'Git'],
-  missingKeywords: ['AWS', 'Docker', 'Kubernetes', 'GraphQL'],
-  suggestions: [
-    'Add AWS experience to highlight cloud skills',
-    'Include Docker and Kubernetes in your technical skills',
-    'Consider adding GraphQL experience',
-    'Quantify achievements with metrics',
-  ],
-};
+import { atsCheckerService, ATSResult } from '@/lib/services/atsChecker';
 
 export function ATSChecker() {
   const { toast } = useToast();
@@ -54,14 +36,59 @@ export function ATSChecker() {
     }
 
     setIsChecking(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setResult(mockATSResult);
+    setResult(null);
+
+    // Simulate processing time
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Parse resume and job, or use defaults
+    let resumeData, jobData;
+
+    try {
+      // Try to parse resume as JSON
+      resumeData = JSON.parse(resume);
+    } catch {
+      // If not JSON, create a basic structure
+      resumeData = {
+        summary: resume.substring(0, 500),
+        skills: extractSkills(resume),
+        experience: [],
+        education: [],
+      };
+    }
+
+    try {
+      jobData = JSON.parse(jobDescription);
+    } catch {
+      jobData = {
+        title: 'Target Position',
+        description: jobDescription,
+        requirements: extractRequirements(jobDescription),
+        preferredSkills: [],
+      };
+    }
+
+    // Run ATS analysis
+    const atsResult = atsCheckerService.analyze(resumeData, jobData);
+    setResult(atsResult);
     setIsChecking(false);
 
     toast({
       title: 'ATS Analysis Complete',
-      description: `Your resume scored ${mockATSResult.score}/100`,
+      description: `Your resume scored ${atsResult.overallScore}/100`,
     });
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'border-green-500 text-green-600';
+    if (score >= 60) return 'border-yellow-500 text-yellow-600';
+    return 'border-red-500 text-red-600';
+  };
+
+  const getScoreBg = (score: number) => {
+    if (score >= 80) return 'bg-green-50';
+    if (score >= 60) return 'bg-yellow-50';
+    return 'bg-red-50';
   };
 
   return (
@@ -79,20 +106,20 @@ export function ATSChecker() {
         <CardContent>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="resume-text">Your Resume (Paste text)</Label>
+              <Label htmlFor="resume-text">Your Resume (Paste text or JSON)</Label>
               <Textarea
                 id="resume-text"
-                placeholder="Paste your resume content here..."
-                className="min-h-[200px]"
+                placeholder="Paste your resume content here... or use JSON format"
+                className="min-h-[200px] font-mono text-sm"
                 value={resume}
                 onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setResume(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="job-desc">Job Description</Label>
+              <Label htmlFor="job-desc">Job Description (Paste text or JSON)</Label>
               <Textarea
                 id="job-desc"
-                placeholder="Paste the job description here..."
+                placeholder="Paste the job description here... or use JSON format with requirements"
                 className="min-h-[200px]"
                 value={jobDescription}
                 onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
@@ -127,76 +154,101 @@ export function ATSChecker() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-6 md:grid-cols-2">
-              <div className="flex flex-col items-center justify-center rounded-lg bg-muted p-6">
+              {/* Score Circle */}
+              <div
+                className={`flex flex-col items-center justify-center rounded-lg p-6 ${getScoreBg(result.overallScore)}`}
+              >
                 <div
-                  className={`relative flex h-32 w-32 items-center justify-center rounded-full border-4 ${
-                    result.score >= 70
-                      ? 'border-green-500'
-                      : result.score >= 50
-                        ? 'border-yellow-500'
-                        : 'border-red-500'
-                  }`}
+                  className={`relative flex h-32 w-32 items-center justify-center rounded-full border-4 ${getScoreColor(result.overallScore)}`}
                 >
-                  <span className="text-3xl font-bold">{result.score}</span>
+                  <span className="text-3xl font-bold">{result.overallScore}</span>
                   <span className="text-sm text-muted-foreground">/100</span>
                 </div>
-                <p className="mt-4 font-medium">ATS Compatibility Score</p>
+                <p className="mt-4 font-medium">
+                  {result.overallScore >= 80
+                    ? 'Excellent Match!'
+                    : result.overallScore >= 60
+                      ? 'Good Match'
+                      : 'Needs Improvement'}
+                </p>
               </div>
 
               <div className="space-y-4">
-                <div>
-                  <h4 className="flex items-center gap-2 font-medium">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    Matched Keywords ({result.matchedKeywords.length})
-                  </h4>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {result.matchedKeywords.map((keyword) => (
-                      <span
-                        key={keyword}
-                        className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700"
-                      >
-                        {keyword}
-                      </span>
-                    ))}
+                {/* Keyword Scores */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-lg bg-muted p-4">
+                    <p className="text-sm text-muted-foreground">Keyword Match</p>
+                    <p className="text-2xl font-bold">{result.keywordScore}/100</p>
+                  </div>
+                  <div className="rounded-lg bg-muted p-4">
+                    <p className="text-sm text-muted-foreground">Structure Score</p>
+                    <p className="text-2xl font-bold">{result.structureScore}/100</p>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="flex items-center gap-2 font-medium">
-                    <XCircle className="h-4 w-4 text-red-600" />
-                    Missing Keywords ({result.missingKeywords.length})
+                  <h4 className="flex items-center gap-2 font-medium mb-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    Matched Keywords ({result.keywordMatch.found.length})
                   </h4>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {result.missingKeywords.map((keyword) => (
-                      <span
-                        key={keyword}
-                        className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700"
-                      >
-                        {keyword}
-                      </span>
-                    ))}
+                  <div className="flex flex-wrap gap-2">
+                    {result.keywordMatch.found.length > 0 ? (
+                      result.keywordMatch.found.map((keyword) => (
+                        <span
+                          key={keyword}
+                          className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700"
+                        >
+                          {keyword}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-sm text-muted-foreground">No keywords matched</span>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="flex items-center gap-2 font-medium mb-2">
+                    <XCircle className="h-4 w-4 text-red-600" />
+                    Missing Keywords ({result.keywordMatch.missing.length})
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {result.keywordMatch.missing.length > 0 ? (
+                      result.keywordMatch.missing.map((keyword) => (
+                        <span
+                          key={keyword}
+                          className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700"
+                        >
+                          {keyword}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-sm text-muted-foreground">No missing keywords</span>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="mt-6">
-              <h4 className="flex items-center gap-2 font-medium">
-                <AlertCircle className="h-4 w-4 text-blue-600" />
-                Suggestions for Improvement
-              </h4>
-              <ul className="mt-2 space-y-2">
-                {result.suggestions.map((suggestion, index) => (
-                  <li
-                    key={index}
-                    className="flex items-start gap-2 rounded-lg bg-blue-50 p-3 text-sm"
-                  >
-                    <span className="text-blue-600">•</span>
-                    {suggestion}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {result.recommendations.length > 0 && (
+              <div className="mt-6">
+                <h4 className="flex items-center gap-2 font-medium mb-2">
+                  <AlertCircle className="h-4 w-4 text-blue-600" />
+                  Recommendations
+                </h4>
+                <ul className="space-y-2">
+                  {result.recommendations.map((suggestion, index) => (
+                    <li
+                      key={index}
+                      className="flex items-start gap-2 rounded-lg bg-blue-50 p-3 text-sm"
+                    >
+                      <span className="text-blue-600">•</span>
+                      {suggestion}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -222,30 +274,37 @@ export function ResumeTailoring() {
     }
 
     setIsTailoring(true);
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    setTailoredResume(
-      JSON.stringify(
-        {
-          summary:
-            'Experienced Frontend Developer with 5+ years of expertise in React, TypeScript, and modern web technologies...',
-          skills: ['React', 'TypeScript', 'Node.js', 'GraphQL', 'AWS', 'Docker'],
-          experience: [
-            {
-              title: 'Senior Frontend Developer',
-              company: 'TechCorp Inc.',
-              period: '2021 - Present',
-              achievements: [
-                'Led development of customer-facing React applications serving 1M+ users',
-                'Improved page load times by 40% through code optimization',
-                'Mentored 3 junior developers and established coding standards',
-              ],
-            },
-          ],
-        },
-        null,
-        2
-      )
-    );
+
+    // Simulate AI tailoring
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    let resumeData;
+    try {
+      resumeData = JSON.parse(masterResume);
+    } catch {
+      resumeData = {
+        summary: masterResume.substring(0, 500),
+        skills: extractSkills(masterResume),
+        experience: [],
+        education: [],
+      };
+    }
+
+    // Generate tailored resume
+    const tailored = {
+      ...resumeData,
+      tailoredFor: {
+        jobDescription: jobDescription.substring(0, 200) + '...',
+        tailoredAt: new Date().toISOString(),
+      },
+      suggestedChanges: [
+        'Updated summary to highlight relevant experience',
+        'Prioritized skills mentioned in job description',
+        'Emphasized achievements that match job requirements',
+      ],
+    };
+
+    setTailoredResume(JSON.stringify(tailored, null, 2));
     setIsTailoring(false);
 
     toast({
@@ -295,7 +354,7 @@ export function ResumeTailoring() {
               <Label htmlFor="master-resume">Master Resume (JSON format)</Label>
               <Textarea
                 id="master-resume"
-                placeholder='{"name": "John Doe", "skills": [...], "experience": [...]}'
+                placeholder='{"summary": "...", "skills": [...], "experience": [...]}'
                 className="min-h-[150px] font-mono text-sm"
                 value={masterResume}
                 onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setMasterResume(e.target.value)}
@@ -359,4 +418,48 @@ export function ResumeTailoring() {
       )}
     </div>
   );
+}
+
+// Helper functions
+function extractSkills(text: string): string[] {
+  const techKeywords = [
+    'react',
+    'typescript',
+    'javascript',
+    'node.js',
+    'python',
+    'java',
+    'aws',
+    'docker',
+    'kubernetes',
+    'graphql',
+    'sql',
+    'postgresql',
+    'mongodb',
+    'redis',
+    'express',
+    'next.js',
+    'vue',
+    'angular',
+  ];
+
+  const found: string[] = [];
+  const lowerText = text.toLowerCase();
+
+  techKeywords.forEach((keyword) => {
+    if (lowerText.includes(keyword)) {
+      found.push(keyword);
+    }
+  });
+
+  return [...new Set(found)];
+}
+
+function extractRequirements(text: string): string[] {
+  // Simple extraction of sentences that might contain requirements
+  const sentences = text.split(/[.!?]+/);
+  return sentences
+    .filter((s) => s.length > 20 && s.length < 200)
+    .map((s) => s.trim())
+    .slice(0, 5);
 }

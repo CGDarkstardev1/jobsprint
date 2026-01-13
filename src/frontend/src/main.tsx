@@ -4,6 +4,17 @@ import App from './App';
 import './index.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastProvider, ToastViewport } from '@/components/ui/toast';
+import { storageService } from '@/lib/services/storage';
+
+// Initialize services on app startup
+storageService
+  .initialize()
+  .then(() => {
+    console.log('[JobSprint] Storage service initialized');
+  })
+  .catch((err) => {
+    console.error('[JobSprint] Failed to initialize storage:', err);
+  });
 
 const queryClient = new QueryClient({
   defaultOptions: {
