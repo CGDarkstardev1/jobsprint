@@ -27,13 +27,38 @@ export interface JobData {
   requirements: string[];
 }
 
-// Declare Puter.js globals
+// Declare Puter.js globals based on official SDK research
 declare global {
+  interface PuterFSItem {
+    name: string;
+    path: string;
+    uid: string;
+    is_dir: boolean;
+    size: number;
+    created: number;
+    modified: number;
+  }
+
   const puter: {
     fs: {
-      write: (filename: string, content: string) => Promise<void>;
-      readdir: (path: string) => Promise<Array<{ name: string }>>;
-      read: (filename: string) => Promise<string>;
+      write: (
+        path: string,
+        data: string | Blob,
+        options?: { overwrite?: boolean }
+      ) => Promise<PuterFSItem>;
+      readdir: (path: string) => Promise<PuterFSItem[]>;
+      read: (path: string) => Promise<Blob>;
+    };
+    ai: {
+      chat: (
+        prompt: string,
+        imageURL?: string,
+        options?: { model?: string; max_tokens?: number }
+      ) => Promise<{
+        message?: {
+          content: string;
+        };
+      }>;
     };
   };
 }
@@ -296,7 +321,8 @@ export class ATSOptimizerService {
 
       for (const file of files) {
         if (file.name.startsWith('ats_analysis_') && file.name.endsWith('.json')) {
-          const content = await puter.fs.read(file.name);
+          const blob = await puter.fs.read(file.name);
+          const content = await blob.text();
           const analysis = JSON.parse(content);
           analyses.push(analysis);
         }
