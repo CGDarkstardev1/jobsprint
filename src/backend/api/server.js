@@ -48,11 +48,13 @@ import connectorsRouter from './connectors.js';
 import googleOAuthRouter from './googleOAuth.js';
 import documentsRouter from './documents.js';
 import aiRouter from './ai.js';
+import indeedRouter from './indeed.js';
 
 app.use('/api/v1', connectorsRouter);
 app.use('/api/v1', googleOAuthRouter);
 app.use('/api/v1', documentsRouter);
 app.use('/api/v1', aiRouter);
+app.use('/api/v1', indeedRouter);
 
 // Create HTTP server and websocket server
 import { initWebSocket } from './websocket.js';

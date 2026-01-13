@@ -4,6 +4,7 @@
  */
 
 import { storageService } from './storage';
+import { jobPlatformService } from './jobPlatforms';
 
 export interface Job {
   id: string;
@@ -996,6 +997,53 @@ class JobSearchService {
    */
   private async searchPlatform(platform: string, filters: SearchFilters): Promise<Job[]> {
     await delay(100 + Math.random() * 200); // Simulate network latency
+
+    // If platform is 'indeed', call backend scraper endpoint
+    if (platform === 'indeed') {
+      try {
+        const params = new URLSearchParams();
+        params.set('q', filters.keywords || '');
+        params.set('l', filters.location || '');
+        params.set('page', '0');
+        const resp = await fetch(`/api/v1/jobs/indeed/search?${params.toString()}`);
+        if (!resp.ok) throw new Error('Indeed API request failed');
+        const data = await resp.json();
+        if (!data || !data.jobs) return [];
+
+        // Map backend jobs to Job interface
+        const mapped: Job[] = data.jobs.map((j: any) => ({
+          id: j.id || `indeed-${Math.random().toString(36).slice(2, 9)}`,
+          title: j.title || j.job_title || '',
+          company: j.company || '',
+          location: j.location || '',
+          salary: j.salary || '$0',
+          salaryMin: j.salaryMin || 0,
+          salaryMax: j.salaryMax || 0,
+          type:
+            (j.jobType && (j.jobType.toLowerCase().includes('part') ? 'part-time' : 'full-time')) ||
+            'full-time',
+          level: (j.experienceLevel || 'mid') as Job['level'],
+          postedAt: new Date().toISOString(),
+          postedRelative: j.postedRelative || 'recent',
+          description: j.snippet || j.description || '',
+          requirements: j.requirements || [],
+          tags: j.tags || [],
+          platform: 'indeed',
+          platformUrl: j.platformUrl || j.link || j.url || '',
+          matchScore: j.matchScore || Math.floor(70 + Math.random() * 25),
+          remote: (j.location || '').toLowerCase().includes('remote'),
+        }));
+
+        return mapped;
+      } catch (error) {
+        console.warn(
+          '[JobSearch] Indeed fetch failed, falling back to local DB:',
+          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+          (error as any)?.message || String(error)
+        );
+        // fallback to local filtering below
+      }
+    }
 
     return JOB_DATABASE.filter((job) => {
       // Platform filter

@@ -38,7 +38,11 @@ router.get('/connect/google/callback', async (req, res) => {
       const { saveProviderToken } = await import('./connectorsStore.js');
       saveProviderToken('google', tokens);
       // Broadcast event for websocket listeners (if any)
-      process.emit('jobEvent', { type: 'CONNECTOR_CONNECTED', provider: 'google', timestamp: new Date().toISOString() });
+      process.emit('jobEvent', {
+        type: 'CONNECTOR_CONNECTED',
+        provider: 'google',
+        timestamp: new Date().toISOString(),
+      });
     } catch (e) {
       console.warn('save token failed', e?.message || e);
     }
@@ -62,11 +66,6 @@ router.get('/connect/google/callback', async (req, res) => {
 
     res.setHeader('Content-Type', 'text/html');
     return res.send(html);
-  } catch (err) {
-    console.error('Google callback error', err);
-    res.status(500).json({ success: false, error: String(err) });
-  }
-});
   } catch (err) {
     console.error('Google callback error', err);
     res.status(500).json({ success: false, error: String(err) });

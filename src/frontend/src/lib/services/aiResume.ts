@@ -221,8 +221,8 @@ class AIResumeService {
     const foundVerbs = ACTION_VERBS.filter((verb) => description.includes(verb.toLowerCase()));
 
     return {
-      requiredKeywords: [...new Set(requiredKeywords)],
-      preferredKeywords: [...new Set(preferredKeywords)],
+      requiredKeywords: Array.from(new Set(requiredKeywords)),
+      preferredKeywords: Array.from(new Set(preferredKeywords)),
       skillsGaps,
       analyzedDescription: description,
     };
@@ -292,8 +292,8 @@ class AIResumeService {
 
     return {
       matchScore: Math.round(baseScore + bonusScore),
-      matchedKeywords: [...new Set(matchedKeywords)],
-      missingKeywords: [...new Set(missingKeywords)],
+      matchedKeywords: Array.from(new Set(matchedKeywords)),
+      missingKeywords: Array.from(new Set(missingKeywords)),
       strengths,
       improvements,
     };
