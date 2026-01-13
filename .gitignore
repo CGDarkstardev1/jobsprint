@@ -14,7 +14,7 @@ yarn.lock
 .env.development
 
 # Build outputs
-# dist/
+dist/
 build/
 *.tsbuildinfo
 coverage/
