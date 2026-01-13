@@ -223,6 +223,8 @@ Instructions:
           await this.page.waitForLoadState('domcontentloaded');
           promptSuffix = ' (NOTE: You are currently viewing a POPUP window. Treat it accordingly.)';
           logger.info(`Switched focus to popup/page index ${pages.length - 1}`);
+        } else if (pages.length === 1) {
+          this.page = pages[0];
         }
 
         const currentPage = this.page;
@@ -231,20 +233,25 @@ Instructions:
         logger.info(`Step ${step}: Taking snapshot of ${currentUrl}...`);
         const screenshot = await currentPage.screenshot({ encoding: 'base64' });
 
-        // Resize image for Vision API optimization (prevents timeouts)
-        const resizedScreenshot = await this.imageResize.resize(screenshot);
+        const viewport = currentPage.viewportSize();
+
+        const resizeResult = await this.imageResize.resizeWithMetadata(screenshot);
+        const { image: resizedScreenshot, metadata } = resizeResult;
+
         const imageDataUrl =
           typeof resizedScreenshot === 'string'
             ? resizedScreenshot
             : `data:image/png;base64,${resizedScreenshot}`;
 
-        // Broadcast screenshot to all connected clients
+        const scaleX = viewport.width / metadata.width;
+        const scaleY = viewport.height / metadata.height;
+
         webSocketService.broadcast('SCREENSHOT', {
           step,
           url: currentUrl,
           image: imageDataUrl,
-          originalSize: this.imageResize.getImageSize(screenshot),
-          resizedSize: this.imageResize.getImageSize(resizedScreenshot),
+          viewport,
+          resizedSize: { width: metadata.width, height: metadata.height },
           timestamp: new Date().toISOString(),
         });
 
@@ -252,6 +259,8 @@ Instructions:
 
 Current URL: ${currentUrl}
 Step: ${step}/${maxSteps}
+Viewport: ${viewport.width}x${viewport.height}
+Image Size: ${metadata.width}x${metadata.height}
 
 User Profile (for form filling):
 ${JSON.stringify(userProfile, null, 2)}
@@ -266,24 +275,23 @@ ${promptSuffix}
 
 VISUAL RECOGNITION INSTRUCTIONS:
 1. Examine the screenshot VERY carefully.
-2. Identify elements by their VISUAL qualities (color, text, shape, proximity to labels).
-3. Do not assume any specific HTML structure or language.
-4. Return the most effective CSS selector you can derive from the visual context.
-5. If you cannot find a selector, describe the element's position relative to others.
+2. Identify elements by their VISUAL qualities.
+3. If a clear CSS selector exists, return it in "target".
+4. IF NO SELECTOR IS OBVIOUS (e.g. inside an iframe, canvas, or complex social button), use "point": {"x": number, "y": number} relative to the screenshot size (${metadata.width}x${metadata.height}).
 
 Return ONLY valid JSON:
 {
   "action": "CLICK" | "TYPE" | "NAVIGATE" | "SCROLL" | "WAIT" | "FINISH",
   "target": "CSS selector or URL",
-  "value": "text to type (for TYPE action)",
+  "point": {"x": X_COORD, "y": Y_COORD},
+  "value": "text to type",
   "reason": "brief explanation based on VISUAL evidence"
 }
 
 Important:
-- Use precise CSS selectors discovered from visual cues
-- If the goal is achieved, use FINISH
-- If stuck, try a different approach
-- For login forms, use credentials from user profile`;
+- Prefer "target" (selector) for stability.
+- Use "point" (coordinates) as a superior fallback for seamless interaction where selectors fail.
+- For login forms, use credentials from user profile.`;
 
         let decision;
         try {
@@ -402,6 +410,62 @@ Important:
                 waitUntil: 'domcontentloaded',
                 timeout: 30000,
               });
+              break;
+            case 'CLICK':
+              if (decision.point) {
+                const targetX = Math.round(decision.point.x * scaleX);
+                const targetY = Math.round(decision.point.y * scaleY);
+                logger.info(
+                  `Superior Click at (${targetX}, ${targetY}) translated from AI point (${decision.point.x}, ${decision.point.y})`
+                );
+                await this.stealth.mouseCurve(currentPage, { x: targetX, y: targetY });
+                await currentPage.mouse.down();
+                await currentPage.mouse.up();
+              } else {
+                await this.stealth.humanClick(currentPage, decision.target);
+              }
+              break;
+            case 'TYPE':
+              if (decision.point) {
+                const targetX = Math.round(decision.point.x * scaleX);
+                const targetY = Math.round(decision.point.y * scaleY);
+                await this.stealth.mouseCurve(currentPage, { x: targetX, y: targetY });
+                await currentPage.mouse.click(targetX, targetY);
+                await this.stealth.humanTyping(currentPage, null, decision.value, {
+                  directType: true,
+                });
+              } else {
+                await this.stealth.humanTyping(currentPage, decision.target, decision.value);
+              }
+              break;
+            case 'CLICK':
+              if (decision.point) {
+                // Superior coordinate-based click with scale translation
+                const targetX = Math.round(decision.point.x * scaleX);
+                const targetY = Math.round(decision.point.y * scaleY);
+                logger.info(
+                  `Superior Click at (${targetX}, ${targetY}) translated from AI point (${decision.point.x}, ${decision.point.y})`
+                );
+                await this.stealth.mouseCurve(currentPage, { x: targetX, y: targetY });
+                await currentPage.mouse.down();
+                await currentPage.mouse.up();
+              } else {
+                await this.stealth.humanClick(currentPage, decision.target);
+              }
+              break;
+            case 'TYPE':
+              if (decision.point) {
+                // Superior coordinate-based focus then type
+                const targetX = Math.round(decision.point.x * scaleX);
+                const targetY = Math.round(decision.point.y * scaleY);
+                await this.stealth.mouseCurve(currentPage, { x: targetX, y: targetY });
+                await currentPage.mouse.click(targetX, targetY);
+                await this.stealth.humanTyping(currentPage, null, decision.value, {
+                  directType: true,
+                });
+              } else {
+                await this.stealth.humanTyping(currentPage, decision.target, decision.value);
+              }
               break;
             case 'CLICK':
               // Use stealth human click
