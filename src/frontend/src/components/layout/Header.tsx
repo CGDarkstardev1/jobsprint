@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Briefcase, FileText, Settings, Rocket, Menu, X, Sparkles } from 'lucide-react';
+import { Search, Briefcase, FileText, Settings, Rocket, Menu, X, Sparkles, MessageSquare, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -11,6 +11,8 @@ const navigation = [
   { name: 'Job Search', href: '/search', icon: Search },
   { name: 'Auto-Apply', href: '/apply', icon: Briefcase },
   { name: 'Resume Tools', href: '/resume', icon: FileText },
+  { name: 'Interview Prep', href: '/interview-prep', icon: MessageSquare },
+  // Pricing moved to button
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
@@ -32,7 +34,7 @@ export function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex md:gap-x-1 lg:gap-x-2">
+          <div className="hidden md:flex md:gap-x-1 lg:gap-x-2 items-center">
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href;
@@ -52,6 +54,18 @@ export function Header() {
                 </Link>
               );
             })}
+            
+            <div className="ml-4 pl-4 border-l h-6"></div>
+            
+            <Link to="/pricing">
+              <Button size="sm" variant="ghost" className={cn(
+                "gap-2 text-amber-600 hover:text-amber-700 hover:bg-amber-50",
+                location.pathname === '/pricing' && "bg-amber-50 text-amber-700"
+              )}>
+                <CreditCard className="h-4 w-4" />
+                Upgrade
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -86,6 +100,14 @@ export function Header() {
                   </Link>
                 );
               })}
+              <Link
+                to="/pricing"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-x-3 rounded-md px-3 py-2 text-base font-medium text-amber-600 hover:bg-amber-50 transition-colors"
+              >
+                <CreditCard className="h-5 w-5" />
+                Upgrade Plan
+              </Link>
             </div>
           </div>
         )}
