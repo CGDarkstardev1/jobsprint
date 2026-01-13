@@ -2,10 +2,13 @@
 
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Search, Zap, FileText, CheckCircle2, Shield, BarChart3 } from 'lucide-react';
+import { ArrowRight, Search, Zap, FileText, CheckCircle2, Shield, BarChart3, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useStats, useApplications, useSavedJobs } from '@/lib/hooks/useJobSearch';
+import { ApplicationStatsWidget } from '@/components/features/ApplicationStatsWidget';
+import { ApplicationTracker } from '@/components/features/ApplicationTracker';
+import { TrustSignals } from '@/components/features/TrustSignals';
 
 export function DashboardPage() {
   const { data: stats, isLoading: statsLoading } = useStats();
@@ -74,56 +77,7 @@ export function DashboardPage() {
       </section>
 
       {/* Quick Stats */}
-      <section className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Applications
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {statsLoading ? '...' : stats?.totalApplications || 0}
-            </div>
-            <p className="text-xs text-green-600">+12% this week</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Interviews</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {statsLoading ? '...' : stats?.interviews || 0}
-            </div>
-            <p className="text-xs text-green-600">+3 this week</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Response Rate
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {statsLoading ? '...' : `${stats?.responseRate || 0}%`}
-            </div>
-            <p className="text-xs text-green-600">+2% vs last week</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Pending Applications
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{statsLoading ? '...' : stats?.pending || 0}</div>
-            <p className="text-xs text-muted-foreground">Waiting for response</p>
-          </CardContent>
-        </Card>
-      </section>
+      <ApplicationStatsWidget />
 
       {/* Quick Actions */}
       <section className="grid gap-4 md:grid-cols-3">
@@ -184,6 +138,14 @@ export function DashboardPage() {
           </CardContent>
         </Card>
       </section>
+
+      {/* Application Tracker */}
+      <section>
+        <ApplicationTracker />
+      </section>
+      
+      {/* Trust Signals Section */}
+      <TrustSignals />
 
       {/* Recent Activity */}
       <section className="grid gap-4 md:grid-cols-2">
